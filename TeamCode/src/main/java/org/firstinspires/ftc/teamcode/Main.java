@@ -90,7 +90,7 @@ public class Main extends LinearOpMode {
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
-        ramp.setDirection(DcMotorSimple.Direction.REVERSE);
+        ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         stopper.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
