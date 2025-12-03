@@ -72,15 +72,11 @@ public class AutoTest extends LinearOpMode {
 
     public void autonomousPathUpdate() {
                 follower.followPath(scorePreload);
-                setPathState(1);
-                if(!follower.isBusy()){
+               /* if(!follower.isBusy()){
                     shoot();
                 }
-    }
 
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
+                */
     }
 
     @Override
@@ -108,7 +104,6 @@ public class AutoTest extends LinearOpMode {
 
         waitForStart();
         opmodeTimer.resetTimer();
-        setPathState(0);
         while (opModeIsActive()) {
             follower.update();
             autonomousPathUpdate();
