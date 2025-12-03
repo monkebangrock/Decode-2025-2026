@@ -23,7 +23,7 @@ public class Auto_BlueFarSide extends OpMode {
     private DcMotorEx rightShooter;
     private DcMotorEx ramp;
     private DcMotorEx intake;
-    private CRServo pusher;
+    private Servo pusher;
     private int pathState;
     int velocity = 1000;
 
@@ -154,7 +154,7 @@ public class Auto_BlueFarSide extends OpMode {
         opmodeTimer.resetTimer();
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
-        pusher = hardwareMap.get(CRServo.class, "pusher");
+        pusher = hardwareMap.get(Servo.class, "pusher");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
 
         rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -170,17 +170,20 @@ public class Auto_BlueFarSide extends OpMode {
     }
 
     public void shoot() {
-        while(rightShooter.getVelocity() != 0){
+        while(rightShooter.getVelocity() != 1){
             rightShooter.setVelocity(1);
         }
-        pusher.setPower(1);
-        ramp.setVelocity(0.75);
-        double current = getRuntime()+10;
-        while(getRuntime() < current){
-            //gives the balls 10 seconds to all get launched
+        for(int i = 0; i<3; i++) {
+            pusher.setPosition(1); //tbd
+            ramp.setVelocity(0);
+            //shoot
+            pusher.setPosition(0); //tbd
+            ramp.setVelocity(0.75);
+            double current = getRuntime() + 3;
+            while (getRuntime() < current) {
+            }
         }
         rightShooter.setVelocity(0);
-        pusher.setPower(0);
         ramp.setVelocity(0);
     }
 }
