@@ -7,6 +7,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -16,7 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
-public class AutoTest extends OpMode {
+public class AutoTest extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -72,7 +73,9 @@ public class AutoTest extends OpMode {
     public void autonomousPathUpdate() {
                 follower.followPath(scorePreload);
                 setPathState(1);
-                shoot();
+                if(!follower.isBusy()){
+                    shoot();
+                }
     }
 
     public void setPathState(int pState) {
@@ -81,20 +84,7 @@ public class AutoTest extends OpMode {
     }
 
     @Override
-    public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
-        follower.update();
-        autonomousPathUpdate();
-        // Feedback to Driver Hub for debugging
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
-    }
-
-    @Override
-    public void init(){
+    public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -102,14 +92,6 @@ public class AutoTest extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
-    }
-
-    @Override
-    public void init_loop() {}
-
-    @Override
-    public void start() {
-        opmodeTimer.resetTimer();
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         //pusher = hardwareMap.get(CRServo.class, "pusher");
@@ -125,6 +107,17 @@ public class AutoTest extends OpMode {
         rightShooter.setVelocityPIDFCoefficients(53, 0.2, 0.5, 0);
 
         setPathState(0);
+        while (opModeIsActive()) {
+            follower.update();
+            autonomousPathUpdate();
+
+            // Feedback to Driver Hub
+            telemetry.addData("path state", pathState);
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
+            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.update();
+        }
     }
 
     public void shoot() {
