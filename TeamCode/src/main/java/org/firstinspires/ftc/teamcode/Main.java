@@ -37,8 +37,6 @@ public class Main extends LinearOpMode {
     long timer = 0;
     SparkFunOTOS otos;
 
-
-
     @Override
     public void runOpMode() {
 
