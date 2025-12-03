@@ -106,6 +106,8 @@ public class AutoTest extends LinearOpMode {
 
         rightShooter.setVelocityPIDFCoefficients(53, 0.2, 0.5, 0);
 
+        waitForStart();
+        opmodeTimer.resetTimer();
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
