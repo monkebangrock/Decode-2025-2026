@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "Example Auto", group = "Examples")
+@Autonomous(name = "BlueFar", group = "Examples")
 public class Auto_BlueFarSide extends OpMode {
 
     private Follower follower;
