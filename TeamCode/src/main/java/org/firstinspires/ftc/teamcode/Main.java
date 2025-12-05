@@ -34,6 +34,10 @@ public class Main extends LinearOpMode {
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
     boolean dpadUpPressed = false;
+    boolean rightBumperPressed = false;
+    boolean xPressed = false;
+    boolean rampMoving = false;
+    int rampTargetPosition = 0;
     int velocity = 1000;
     long timer = 0;
     SparkFunOTOS otos;
@@ -64,6 +68,7 @@ public class Main extends LinearOpMode {
         rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         leftShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ramp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //brake motors
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -199,10 +204,30 @@ public class Main extends LinearOpMode {
     }
 
     public void shooter(){
-        if (gamepad2.right_bumper) {
+        telemetry.addData("Ramp Moving:", rampMoving);
+        telemetry.addData("Ramp Current Position:", ramp.getCurrentPosition());
+        telemetry.addData("Ramp Target Position:", rampTargetPosition);
+        //telemetry.update();
+        if (gamepad2.right_bumper && !rightBumperPressed) {
+            rightBumperPressed = true;
             tapper.setPosition(0.05);
-        } else {
+        } else if (!gamepad2.right_bumper && rightBumperPressed) {
+            rightBumperPressed = false;
             tapper.setPosition(0.0);
+            rampTargetPosition = ramp.getCurrentPosition() + 1000;
+            ramp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            ramp.setTargetPosition(rampTargetPosition);
+            ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ramp.setPower(.5);
+            rampMoving = true;
+
+
+        }
+        else {
+            if(rampMoving && ramp.getCurrentPosition() == rampTargetPosition){
+                ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                rampMoving = false;
+            }
         }
 
         if(gamepad2.dpad_up && !dpadUpPressed){
@@ -253,6 +278,26 @@ public class Main extends LinearOpMode {
             }
             //stopper.setPosition(0);
             timer=0;
+        }
+
+        if(gamepad2.x && !xPressed) {
+            xPressed = true;
+            rampTargetPosition = ramp.getCurrentPosition() - 500;
+            ramp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rampMoving = true;
+            ramp.setPower(.5);
+            while(ramp.getCurrentPosition()>rampTargetPosition) {
+                ramp.setTargetPosition(rampTargetPosition);
+                ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+        } else if (!gamepad2.x) {
+            xPressed = false;
+        }
+        else {
+            if (rampMoving && ramp.getCurrentPosition() == rampTargetPosition){
+                ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                rampMoving = false;
+            }
         }
     }
 
