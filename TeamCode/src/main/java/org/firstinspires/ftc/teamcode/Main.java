@@ -29,6 +29,7 @@ public class Main extends LinearOpMode {
     private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
     private CRServo pusher = null;
+    private Servo tapper =null;
     private Servo stopper=null;
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
@@ -53,6 +54,8 @@ public class Main extends LinearOpMode {
         pusher = hardwareMap.get(CRServo.class, "pusher");
         stopper = hardwareMap.get(Servo.class, "stopper");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
+        tapper = hardwareMap.get(Servo.class, "tapper");
+
 
         //reset encoder
         leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -196,6 +199,12 @@ public class Main extends LinearOpMode {
     }
 
     public void shooter(){
+        if (gamepad2.right_bumper) {
+            tapper.setPosition(0.05);
+        } else {
+            tapper.setPosition(0.0);
+        }
+
         if(gamepad2.dpad_up && !dpadUpPressed){
             shooterActive=true;
             dpadUpPressed=true;
