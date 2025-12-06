@@ -71,16 +71,19 @@ public class AutoTest extends LinearOpMode {
     }
 
     public void autonomousPathUpdate() {
+        switch(pathState) {
+            case 0: // Start path
                 follower.followPath(scorePreload);
-                setPathState(1);
+                pathState = 1;
+                break;
+
+            case 1: // Wait for path to finish
                 if(!follower.isBusy()){
                     shoot();
+                    pathState = 2; // Done
                 }
-    }
-
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
+                break;
+        }
     }
 
     @Override
@@ -106,8 +109,11 @@ public class AutoTest extends LinearOpMode {
 
         rightShooter.setVelocityPIDFCoefficients(53, 0.2, 0.5, 0);
 
-        setPathState(0);
+        waitForStart();
+        pathState = 0;
+        opmodeTimer.resetTimer();
         while (opModeIsActive()) {
+            //shoot();  // for test -- just put it at start
             follower.update();
             autonomousPathUpdate();
 
@@ -121,11 +127,10 @@ public class AutoTest extends LinearOpMode {
     }
 
     public void shoot() {
-        while(rightShooter.getVelocity() != 1){
-            rightShooter.setVelocity(1);
-        }
+        rightShooter.setVelocity(velocity);
+
         //pusher.setPower(1);
-        ramp.setVelocity(0.75);
+        ramp.setPower(0.75);
         double current = getRuntime()+10;
         while(getRuntime() < current){
             //gives the balls 10 seconds to all get launched
