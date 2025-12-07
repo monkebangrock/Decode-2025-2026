@@ -29,7 +29,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(21, 124, Math.toRadians(-36));
-    private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(-45));
+    private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(-48));
     private final Pose pickup1 = new Pose(48, 84, Math.toRadians(180));
     private final Pose pickup2 = new Pose(48, 59, Math.toRadians(180));
     private final Pose finishPickup1 = new Pose(19, 84, Math.toRadians(180));
@@ -179,9 +179,9 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
     public void shoot() {
         rightShooter.setMotorEnable();
-        while((rightShooter.getVelocity() != 1200)&&opModeIsActive()){
+        while((rightShooter.getVelocity() != 1250)&&opModeIsActive()){
             telemetry.addData("velocity",rightShooter.getVelocity());
-            rightShooter.setVelocity(1200);
+            rightShooter.setVelocity(1250);
             if(rightShooter.getVelocity()>=900){
                 break;
             }
