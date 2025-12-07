@@ -16,8 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 //@Disabled
-public class Main extends LinearOpMode {
-//test Abby 3
+public class Main100Percent extends LinearOpMode {
+    //test Abby 3
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx leftFront = null;
@@ -174,10 +174,10 @@ public class Main extends LinearOpMode {
             double frontRightPower = (rotY - rotX - rxscaled) / denominator;
             double backRightPower = (rotY + rotX - rxscaled) / denominator;
 
-            leftFront.setPower(frontLeftPower*.8);
-            leftBack.setPower(backLeftPower*.8);
-            rightFront.setPower(frontRightPower*.8);
-            rightBack.setPower(backRightPower*.8);
+            leftFront.setPower(frontLeftPower);
+            leftBack.setPower(backLeftPower);
+            rightFront.setPower(frontRightPower);
+            rightBack.setPower(backRightPower);
 
             intake();
             shooter();
