@@ -30,10 +30,10 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
     private final Pose startPose = new Pose(21, 124, Math.toRadians(-36));
     private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(-48));
-    private final Pose pickup1 = new Pose(48, 84, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(48, 59, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(19, 84, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(19, 59, Math.toRadians(180));
+    private final Pose pickup1 = new Pose(48, 94, Math.toRadians(180));
+    private final Pose pickup2 = new Pose(48, 69, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(22, 90, Math.toRadians(180));
+    private final Pose finishPickup2 = new Pose(22, 64, Math.toRadians(180));
     private final Pose ending = new Pose(60,130,0);
 
     private Path scorePreload;
