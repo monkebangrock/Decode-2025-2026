@@ -52,7 +52,7 @@ public class Constants {
             .angleUnit(AngleUnit.RADIANS)
             .linearScalar(0.991833)
             .angularScalar(0.996833)
-            .offset(new SparkFunOTOS.Pose2D(-(180.0/25.4), -(76.0/25.4), (Math.PI/2.0)));
+            .offset(new SparkFunOTOS.Pose2D(-2.875, -7.125, (Math.PI/2.0)));
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.5, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {

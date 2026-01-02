@@ -24,12 +24,11 @@ public class Auto_BlueFarSide extends LinearOpMode {
     private DcMotorEx rightShooter;
     private DcMotorEx ramp;
     private DcMotorEx intake;
-    private Servo tapper;
     private int pathState;
     int velocity = 1000;
 
-    private final Pose startPose = new Pose(21, 124, Math.toRadians(-36));
-    private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(-48));
+    private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
+    private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(132));
     private final Pose pickup1 = new Pose(48, 94, Math.toRadians(180));
     private final Pose pickup2 = new Pose(48, 69, Math.toRadians(180));
     private final Pose finishPickup1 = new Pose(22, 90, Math.toRadians(180));
@@ -149,7 +148,6 @@ public class Auto_BlueFarSide extends LinearOpMode {
         follower.setStartingPose(startPose);
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
-        tapper = hardwareMap.get(Servo.class, "tapper");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
 
         rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -192,12 +190,10 @@ public class Auto_BlueFarSide extends LinearOpMode {
         double current = getRuntime();
         while((getRuntime()<current+2)&&opModeIsActive()){
             if(getRuntime()>=current+0.8){
-                tapper.setPosition(0.03);
             }
             telemetry.addData("time:",(getRuntime()-current));
             telemetry.update();
         }
-        tapper.setPosition(0);
         while((rightShooter.getVelocity() != 0)&&opModeIsActive()){
             telemetry.addData("velocity",rightShooter.getVelocity());
             rightShooter.setVelocity(0);
