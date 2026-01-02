@@ -29,7 +29,7 @@ public class Main100Percent extends LinearOpMode {
     private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
     private CRServo pusher = null;
-    private Servo tapper =null;
+    //private Servo tapper =null;
     private Servo stopper=null;
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
@@ -57,9 +57,9 @@ public class Main100Percent extends LinearOpMode {
         leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         pusher = hardwareMap.get(CRServo.class, "pusher");
-        stopper = hardwareMap.get(Servo.class, "stopper");
+        //stopper = hardwareMap.get(Servo.class, "stopper");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
-        tapper = hardwareMap.get(Servo.class, "tapper");
+        //tapper = hardwareMap.get(Servo.class, "tapper");
 
 
         //reset encoder
@@ -100,7 +100,8 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
-        stopper.setDirection(Servo.Direction.REVERSE);
+        rightShooter.setDirection(DcMotor.Direction.REVERSE);
+        //stopper.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -123,7 +124,7 @@ public class Main100Percent extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
-        stopper.setPosition(0.25);
+        //stopper.setPosition(0.25);
         leftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -203,7 +204,7 @@ public class Main100Percent extends LinearOpMode {
             intake.setMotorDisable();
             if(!rampMoving1 && !rampMoving2){
                 // turn off the ramp (if its not being told to run for other reason)
-                ramp.setMotorDisable();
+                //ramp.setMotorDisable();
             }
         }
     }
@@ -211,22 +212,27 @@ public class Main100Percent extends LinearOpMode {
     public void shooter(){
         if (gamepad2.right_bumper && !rightBumperPressed) {
             rightBumperPressed = true;
-            tapper.setPosition(0.05);
-        } else if (!gamepad2.right_bumper && rightBumperPressed) {
-            rightBumperPressed = false;
-            tapper.setPosition(0.0);
-            rampTargetPosition = ramp.getCurrentPosition() + 500;
+            //tapper.setPosition(0.05);
+            /*ampTargetPosition = ramp.getCurrentPosition() + 1500;
             ramp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             ramp.setTargetPosition(rampTargetPosition);
-            ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ramp.setPower(0.5);
+            ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
             ramp.setMotorEnable();
+            ramp.setPower(1);
             rampMoving1 = true;
+            pusher.setPower(1);
+        } else if (!gamepad2.right_bumper && rightBumperPressed) {
+            rightBumperPressed = false;
+            //tapper.setPosition(0.0);
+            pusher.setPower(0);
+            ramp.setPower(0);
+            ramp.setMotorEnable();
+            rampMoving1 = false;
         }
         else {
             if(rampMoving1 && ramp.getCurrentPosition() >= rampTargetPosition){
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ramp.setMotorDisable();
+                //ramp.setMotorDisable();
                 rampMoving1 = false;
             }
         }
@@ -277,7 +283,7 @@ public class Main100Percent extends LinearOpMode {
             if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition){
                 // Done moving ramp -- go back to RUN_WITHOUT_ENCODER mode
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ramp.setMotorDisable();
+                //ramp.setMotorDisable();
                 rampMoving2 = false;
             }
         }
