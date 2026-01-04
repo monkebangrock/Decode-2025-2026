@@ -132,7 +132,7 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        pusher.setPosition(0.44);
+        pusher.setPosition(0);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -221,13 +221,13 @@ public class Main100Percent extends LinearOpMode {
             ramp.setTargetPosition(rampTargetPosition);
             ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
             ramp.setMotorEnable();
-            ramp.setPower(1);
+            ramp.setPower(0.7);
             rampMoving1 = true;
-            pusher.setPosition(0.0);
+            pusher.setPosition(1);
         } else if (!gamepad2.right_bumper && rightBumperPressed) {
             rightBumperPressed = false;
             //tapper.setPosition(0.0);
-            pusher.setPosition(0.44);
+            pusher.setPosition(0);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;
