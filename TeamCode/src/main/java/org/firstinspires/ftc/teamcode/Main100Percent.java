@@ -4,7 +4,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -28,7 +28,7 @@ public class Main100Percent extends LinearOpMode {
     private DcMotorEx rightShooter = null;
     private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
-    private CRServo pusher = null;
+    private Servo pusher = null;
     //private Servo tapper =null;
     private Servo stopper=null;
     boolean shooterActive=false;
@@ -41,6 +41,7 @@ public class Main100Percent extends LinearOpMode {
     int rampTargetPosition = 0;
     int velocity = 1000;
     long timer = 0;
+    double servoPosition = 0.0;
     SparkFunOTOS otos;
 
     @Override
@@ -56,7 +57,7 @@ public class Main100Percent extends LinearOpMode {
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
-        pusher = hardwareMap.get(CRServo.class, "pusher");
+        pusher = hardwareMap.get(Servo.class, "pusher");
         //stopper = hardwareMap.get(Servo.class, "stopper");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         //tapper = hardwareMap.get(Servo.class, "tapper");
@@ -101,6 +102,7 @@ public class Main100Percent extends LinearOpMode {
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         rightShooter.setDirection(DcMotor.Direction.REVERSE);
+        pusher.setDirection(Servo.Direction.REVERSE);
         //stopper.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
@@ -130,6 +132,7 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        pusher.setPosition(0.44);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -202,9 +205,9 @@ public class Main100Percent extends LinearOpMode {
         else{
             // turn off intake
             intake.setMotorDisable();
-            if(!rampMoving1 && !rampMoving2){
+            if(!rampMoving1 && !rampMoving2 && !gamepad2.right_bumper){
                 // turn off the ramp (if its not being told to run for other reason)
-                //ramp.setMotorDisable();
+                ramp.setMotorDisable();
             }
         }
     }
@@ -220,19 +223,19 @@ public class Main100Percent extends LinearOpMode {
             ramp.setMotorEnable();
             ramp.setPower(1);
             rampMoving1 = true;
-            pusher.setPower(1);
+            pusher.setPosition(0.0);
         } else if (!gamepad2.right_bumper && rightBumperPressed) {
             rightBumperPressed = false;
             //tapper.setPosition(0.0);
-            pusher.setPower(0);
+            pusher.setPosition(0.44);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;
         }
         else {
-            if(rampMoving1 && ramp.getCurrentPosition() >= rampTargetPosition){
+            if(rampMoving1 && ramp.getCurrentPosition() >= rampTargetPosition && !gamepad2.right_bumper){
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                //ramp.setMotorDisable();
+                ramp.setMotorDisable();
                 rampMoving1 = false;
             }
         }
@@ -280,10 +283,10 @@ public class Main100Percent extends LinearOpMode {
             // x was pressed, but not pressed any longer
             xPressed = false;
         } else {
-            if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition){
+            if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition &&!gamepad2.right_bumper){
                 // Done moving ramp -- go back to RUN_WITHOUT_ENCODER mode
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                //ramp.setMotorDisable();
+                ramp.setMotorDisable();
                 rampMoving2 = false;
             }
         }
