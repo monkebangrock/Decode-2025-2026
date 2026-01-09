@@ -4,6 +4,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -28,9 +29,7 @@ public class Main100Percent extends LinearOpMode {
     private DcMotorEx rightShooter = null;
     private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
-    private Servo pusher = null;
-    //private Servo tapper =null;
-    private Servo stopper=null;
+    private Servo blocker=null;
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
     boolean dpadUpPressed = false;
@@ -57,10 +56,8 @@ public class Main100Percent extends LinearOpMode {
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
-        pusher = hardwareMap.get(Servo.class, "pusher");
-        //stopper = hardwareMap.get(Servo.class, "stopper");
+        blocker = hardwareMap.get(Servo.class, "blocker");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
-        //tapper = hardwareMap.get(Servo.class, "tapper");
 
 
         //reset encoder
@@ -82,8 +79,7 @@ public class Main100Percent extends LinearOpMode {
         leftShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftShooter.setVelocityPIDFCoefficients(53, 0.2, 0.5, 0);
-        rightShooter.setVelocityPIDFCoefficients(53, 0.2, 0.5, 0);
+        rightShooter.setVelocityPIDFCoefficients(60, 2, 60, 0);
 
 
         // ########################################################################################
@@ -102,8 +98,6 @@ public class Main100Percent extends LinearOpMode {
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         rightShooter.setDirection(DcMotor.Direction.REVERSE);
-        pusher.setDirection(Servo.Direction.REVERSE);
-        //stopper.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -126,13 +120,12 @@ public class Main100Percent extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
-        //stopper.setPosition(0.25);
         leftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        pusher.setPosition(0);
+        blocker.setPosition(0.06);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -200,7 +193,7 @@ public class Main100Percent extends LinearOpMode {
             intake.setMotorEnable();
             ramp.setMotorEnable();
             intake.setPower(.5);
-            ramp.setPower(.75);
+            ramp.setPower(.6);
         }
         else{
             // turn off intake
@@ -215,19 +208,14 @@ public class Main100Percent extends LinearOpMode {
     public void shooter(){
         if (gamepad2.right_bumper && !rightBumperPressed) {
             rightBumperPressed = true;
-            //tapper.setPosition(0.05);
-            /*ampTargetPosition = ramp.getCurrentPosition() + 1500;
-            ramp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ramp.setTargetPosition(rampTargetPosition);
-            ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+
             ramp.setMotorEnable();
-            ramp.setPower(0.7);
+            ramp.setPower(1);
+            blocker.setPosition(0);
             rampMoving1 = true;
-            pusher.setPosition(1);
         } else if (!gamepad2.right_bumper && rightBumperPressed) {
             rightBumperPressed = false;
-            //tapper.setPosition(0.0);
-            pusher.setPosition(0);
+            blocker.setPosition(0.06);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;
