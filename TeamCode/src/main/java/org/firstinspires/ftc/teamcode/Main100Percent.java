@@ -197,10 +197,10 @@ public class Main100Percent extends LinearOpMode {
         }
         else{
             // turn off intake
-            intake.setMotorDisable();
             if(!rampMoving1 && !rampMoving2 && !gamepad2.right_bumper){
                 // turn off the ramp (if its not being told to run for other reason)
                 ramp.setMotorDisable();
+                intake.setMotorDisable();
             }
         }
     }
@@ -208,7 +208,8 @@ public class Main100Percent extends LinearOpMode {
     public void shooter(){
         if (gamepad2.right_bumper && !rightBumperPressed) {
             rightBumperPressed = true;
-
+            intake.setMotorEnable();
+            intake.setPower(0.5);
             ramp.setMotorEnable();
             ramp.setPower(1);
             blocker.setPosition(0);
