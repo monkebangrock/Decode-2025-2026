@@ -79,7 +79,7 @@ public class Main100Percent extends LinearOpMode {
         leftShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        rightShooter.setVelocityPIDFCoefficients(60, 2, 60, 0);
+        rightShooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
 
         // ########################################################################################

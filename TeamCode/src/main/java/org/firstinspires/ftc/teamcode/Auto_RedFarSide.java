@@ -159,7 +159,7 @@ public class Auto_RedFarSide extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        rightShooter.setVelocityPIDFCoefficients(60, 2, 60, 0);
+        rightShooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
         waitForStart();
         opmodeTimer.resetTimer();
