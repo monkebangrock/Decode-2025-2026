@@ -12,8 +12,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @TeleOp
 //@Disabled
@@ -26,10 +30,12 @@ public class Main100Percent extends LinearOpMode {
     private DcMotorEx rightFront = null;
     private DcMotorEx rightBack = null;
     private DcMotorEx intake = null;
-    private DcMotorEx rightShooter = null;
+    private DcMotorEx shooter = null;
     private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
     private Servo blocker=null;
+    private Servo rightLight=null;
+    private Servo leftLight=null;
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
     boolean dpadUpPressed = false;
@@ -38,10 +44,18 @@ public class Main100Percent extends LinearOpMode {
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
     int rampTargetPosition = 0;
-    int velocity = 1000;
+    int velocity = 1300;
     long timer = 0;
     double servoPosition = 0.0;
+    double distance;
+    double angleToGoalDegrees;
+    double angleToGoalRadians;
+    double limelightLensHeightInches = 16.75;
+    double goalHeightInches = 29.5;
+    int adjustment=0;
+    LLResult llResult;
     SparkFunOTOS otos;
+    Limelight3A limelight;
 
     @Override
     public void runOpMode() {
@@ -53,11 +67,14 @@ public class Main100Percent extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-        rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         blocker = hardwareMap.get(Servo.class, "blocker");
+        rightLight = hardwareMap.get(Servo.class, "rightLight");
+        leftLight = hardwareMap.get(Servo.class, "leftLight");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
 
         //reset encoder
@@ -65,7 +82,7 @@ public class Main100Percent extends LinearOpMode {
         leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        rightShooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        shooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         leftShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ramp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -75,11 +92,11 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        rightShooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
+        shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
 
         // ########################################################################################
@@ -97,11 +114,12 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightShooter.setDirection(DcMotor.Direction.REVERSE);
+        shooter.setDirection(DcMotor.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
         otos.setPosition(currentPosition);
+        limelight.pipelineSwitch(0);
 
 
         // Retrieve the IMU from the hardware map
@@ -112,7 +130,7 @@ public class Main100Percent extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
-
+        limelight.start();
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -126,6 +144,8 @@ public class Main100Percent extends LinearOpMode {
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         blocker.setPosition(0.06);
+        rightLight.setPosition(1);
+        leftLight.setPosition(1);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -154,6 +174,7 @@ public class Main100Percent extends LinearOpMode {
             }
 
             double botHeading = Math.toRadians(otos.getPosition().h);
+            llResult = limelight.getLatestResult();
             //imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             // Rotate the movement direction counter to the bot's rotation
@@ -178,12 +199,14 @@ public class Main100Percent extends LinearOpMode {
 
             intake();
             shooter();
+            setSpeed();
+            align();
             unjam();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
             telemetry.addData("imu output: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-            telemetry.update();
+            //telemetry.update();
         }
     }
 
@@ -197,7 +220,7 @@ public class Main100Percent extends LinearOpMode {
         }
         else{
             // turn off intake
-            if(!rampMoving1 && !rampMoving2 && !gamepad2.right_bumper){
+            if(!rampMoving1 && !rampMoving2 && !gamepad2.left_bumper){
                 // turn off the ramp (if its not being told to run for other reason)
                 ramp.setMotorDisable();
                 intake.setMotorDisable();
@@ -206,7 +229,7 @@ public class Main100Percent extends LinearOpMode {
     }
 
     public void shooter(){
-        if (gamepad2.right_bumper && !rightBumperPressed) {
+        if (gamepad2.left_bumper && !rightBumperPressed) {
             rightBumperPressed = true;
             intake.setMotorEnable();
             intake.setPower(0.5);
@@ -214,7 +237,7 @@ public class Main100Percent extends LinearOpMode {
             ramp.setPower(1);
             blocker.setPosition(0);
             rampMoving1 = true;
-        } else if (!gamepad2.right_bumper && rightBumperPressed) {
+        } else if (!gamepad2.left_bumper && rightBumperPressed) {
             rightBumperPressed = false;
             blocker.setPosition(0.06);
             ramp.setPower(0);
@@ -222,38 +245,95 @@ public class Main100Percent extends LinearOpMode {
             rampMoving1 = false;
         }
         else {
-            if(rampMoving1 && ramp.getCurrentPosition() >= rampTargetPosition && !gamepad2.right_bumper){
+            if(rampMoving1 && ramp.getCurrentPosition() >= rampTargetPosition && !gamepad2.left_bumper){
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 ramp.setMotorDisable();
                 rampMoving1 = false;
             }
         }
 
-        if(gamepad2.dpad_up && !dpadUpPressed){
+        if(gamepad2.left_stick_y==-1){
             shooterActive=true;
+        }
+        if(gamepad2.left_stick_y==1){
+            shooterActive=false;
+        }
+
+        if(gamepad2.dpad_up && !dpadUpPressed){
+            adjustment+=10;
             dpadUpPressed=true;
         }
         else{
             dpadUpPressed=false;
         }
         if(gamepad2.dpad_down && !dpadDownPressed){
-            shooterActive=false;
-            dpadUpPressed=true;
+            adjustment-=10;
+            dpadDownPressed=true;
         }
         else{
-            dpadUpPressed=false;
+            dpadDownPressed=false;
         }
+
         if(shooterActive){
-            rightShooter.setVelocity(velocity);
+            shooter.setVelocity(velocity);
         }
         else{
-            rightShooter.setVelocity(0);
+            shooter.setVelocity(0);
         }
-        if(gamepad2.left_stick_y<0){
-            velocity-=gamepad2.left_stick_y*10;
+    }
+
+    public void setSpeed(){
+        if (llResult !=null && llResult.isValid()){
+            Pose3D botpose = llResult.getBotpose_MT2();
+            angleToGoalDegrees = llResult.getTy();
+            angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+            distance = (goalHeightInches-limelightLensHeightInches)/Math.tan(angleToGoalRadians);
         }
-        else if(gamepad2.left_stick_y>0){
-            velocity-=gamepad2.left_stick_y*10;
+        if(distance<=50){
+            velocity=1300+adjustment;
+        }
+        else if(distance<=60){
+            velocity=1250+adjustment;
+        }
+        else if(distance<=72){
+            velocity=1200+adjustment;
+        }
+        else if(distance<=85){
+            velocity=1275+adjustment;
+        }
+        else if(distance<=100){
+            velocity=1350+adjustment;
+        }
+        else if(distance<=120){
+            velocity=1400+adjustment;
+        }
+        else{
+            velocity=1450+adjustment;
+        }
+    }
+
+    public void align(){
+        if (llResult !=null && llResult.isValid()){
+            double centeredTx=Math.tan(6/distance);
+            double disalignment=llResult.getTx()-centeredTx;
+            if(disalignment<-5){
+                rightLight.setPosition(.3);
+                //leftLight.setPosition(.277);
+            }
+            else if(disalignment>5){
+                rightLight.setPosition(.611);
+                //leftLight.setPosition(.277);
+            }
+            else if(Math.abs(disalignment)<15 && Math.abs(disalignment)>1){
+                rightLight.setPosition(0.388);
+            }
+            else{
+                rightLight.setPosition(0.5);
+                leftLight.setPosition(0.5);
+            }
+            telemetry.addData("Tx", llResult.getTx());
+            telemetry.addData("disalignment", llResult.getTx()-centeredTx);
+            telemetry.update();
         }
     }
 
@@ -272,7 +352,7 @@ public class Main100Percent extends LinearOpMode {
             // x was pressed, but not pressed any longer
             xPressed = false;
         } else {
-            if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition &&!gamepad2.right_bumper){
+            if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition &&!gamepad2.left_bumper){
                 // Done moving ramp -- go back to RUN_WITHOUT_ENCODER mode
                 ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 ramp.setMotorDisable();
