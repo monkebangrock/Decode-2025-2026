@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -25,52 +26,56 @@ public class Auto_BlueFarSide extends LinearOpMode {
     private DcMotorEx ramp;
     private DcMotorEx intake;
     private int pathState;
+    private Servo blocker;
     int velocity = 1000;
 
     private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
-    private final Pose launchPose = new Pose(42.5, 100, Math.toRadians(132));
-    private final Pose pickup1 = new Pose(48, 94, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(48, 69, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(22, 90, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(22, 64, Math.toRadians(180));
-    private final Pose ending = new Pose(60,130,0);
+    private final Pose launchPose1 = new Pose(42.5, 100, Math.toRadians(132));
+    private final Pose launchPose2 = new Pose(45, 95, Math.toRadians(135));
+    private final Pose launchPose3 = new Pose(50,90,Math.toRadians(131));
+    private final Pose pickup1 = new Pose(51, 89, Math.toRadians(180));
+    private final Pose pickup2 = new Pose(51, 64, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(24, 89, Math.toRadians(180));
+    private final Pose finishPickup2 = new Pose(24, 64, Math.toRadians(180));
+    private final Pose control = new Pose(47,60);
+    private final Pose ending = new Pose(60,138,0);
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, endPath;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(startPose, launchPose));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
+        scorePreload = new Path(new BezierLine(startPose, launchPose1));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), launchPose1.getHeading());
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
         beforePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup1))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup1.getHeading())
+                .addPath(new BezierLine(launchPose2, pickup1))
+                .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup1.getHeading())
                 .build();
         getPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1, finishPickup1))
                 .setLinearHeadingInterpolation(pickup1.getHeading(), finishPickup1.getHeading())
                 .build();
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(finishPickup1, launchPose))
-                .setLinearHeadingInterpolation(finishPickup1.getHeading(), launchPose.getHeading())
+                .addPath(new BezierLine(finishPickup1, launchPose2))
+                .setLinearHeadingInterpolation(finishPickup1.getHeading(), launchPose2.getHeading())
                 .build();
         beforePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup2))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup2.getHeading())
+                .addPath(new BezierLine(launchPose2, pickup2))
+                .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup2.getHeading())
                 .build();
         getPickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup2, finishPickup2))
                 .setLinearHeadingInterpolation(pickup2.getHeading(), finishPickup2.getHeading())
                 .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(finishPickup2, launchPose))
-                .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose.getHeading())
+                .addPath(new BezierCurve(finishPickup2, control, launchPose3))
+                .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
                 .build();
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, ending))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), ending.getHeading())
+                .addPath(new BezierLine(launchPose3, ending))
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading())
                 .build();
     }
 
@@ -126,6 +131,12 @@ public class Auto_BlueFarSide extends LinearOpMode {
                 if (!follower.isBusy()){
                     shoot();
                     follower.followPath(endPath);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if (!follower.isBusy()){
+                    stopShooter();
                     setPathState(-1);
                 }
                 break;
@@ -149,9 +160,11 @@ public class Auto_BlueFarSide extends LinearOpMode {
         rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+        blocker = hardwareMap.get(Servo.class, "blocker");
 
         rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        rightShooter.setDirection(DcMotor.Direction.REVERSE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -161,6 +174,8 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
         waitForStart();
         opmodeTimer.resetTimer();
+        blocker.setPosition(0.06);
+        rightShooter.setVelocity(1250);
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
@@ -177,43 +192,42 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
     public void shoot() {
         rightShooter.setMotorEnable();
-        while((rightShooter.getVelocity() != 1250)&&opModeIsActive()){
+        blocker.setPosition(0.08);
+        while((rightShooter.getVelocity() <= 1250)&&opModeIsActive()){
             telemetry.addData("velocity",rightShooter.getVelocity());
             rightShooter.setVelocity(1250);
-            if(rightShooter.getVelocity()>=900){
-                break;
-            }
             telemetry.update();
         }
-        //pusher.setPower(1);
-        ramp.setPower(0.5);
+        blocker.setPosition(0);
+        ramp.setPower(1);
         double current = getRuntime();
-        while((getRuntime()<current+2)&&opModeIsActive()){
-            if(getRuntime()>=current+0.8){
-            }
+        while((getRuntime()<current+3)&&opModeIsActive()){
             telemetry.addData("time:",(getRuntime()-current));
             telemetry.update();
         }
-        while((rightShooter.getVelocity() != 0)&&opModeIsActive()){
-            telemetry.addData("velocity",rightShooter.getVelocity());
-            rightShooter.setVelocity(0);
-            telemetry.update();
-        }
-        rightShooter.setPower(0);
+        //rightShooter.setVelocity(0);
+        blocker.setPosition(0.06);
+        //rightShooter.setPower(0);
         telemetry.addData("velocity",rightShooter.getVelocity());
         // pusher.setPower(0);
         ramp.setPower(0);
-        rightShooter.setMotorDisable();
+        //rightShooter.setMotorDisable();
     }
 
     public void startIntake(){
-        intake.setPower(0.5);
-        ramp.setPower(0.75);
+        intake.setPower(0.7);
+        ramp.setPower(0.6);
     }
 
     public void endIntake(){
         intake.setPower(0);
         ramp.setPower(0);
+    }
+
+    public void stopShooter(){
+        rightShooter.setVelocity(0);
+        rightShooter.setPower(0);
+        rightShooter.setMotorDisable();
     }
 }
 
