@@ -32,7 +32,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
     private final Pose launchPose1 = new Pose(58, 33, Math.toRadians(121));
     private final Pose launchPose2 = new Pose(58, 33, Math.toRadians(121));
-    private final Pose launchPose3 = new Pose(58, 40, Math.toRadians(121));
+    private final Pose launchPose3 = new Pose(58, 38, Math.toRadians(121));
     private final Pose pickup1 = new Pose(51, 37, Math.toRadians(180));
     private final Pose pickup2 = new Pose(51, 63, Math.toRadians(180));
     private final Pose finishPickup1 = new Pose(24, 37, Math.toRadians(180));
