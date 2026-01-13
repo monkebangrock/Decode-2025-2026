@@ -18,8 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(9.888)
-            .forwardZeroPowerAcceleration(-37.5865)
-            .lateralZeroPowerAcceleration(-68.464)
+            .forwardZeroPowerAcceleration(-25.417)
+            .lateralZeroPowerAcceleration(-60.309)
             .centripetalScaling(0.0015)
             .useSecondaryDrivePIDF(true)
             .useSecondaryTranslationalPIDF(true)
@@ -41,8 +41,8 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(79.886)
-            .yVelocity(63.407);
+            .xVelocity(75.295)
+            .yVelocity(59.75);
 
     // NOTE: Use the 22mm mount box
     //       Skinny bar towards back of robot.
@@ -50,7 +50,7 @@ public class Constants {
             .hardwareMapName("otos")
             .linearUnit(DistanceUnit.INCH)
             .angleUnit(AngleUnit.RADIANS)
-            .linearScalar(0.991833)
+            .linearScalar(1.056)
             .angularScalar(0.996833)
             .offset(new SparkFunOTOS.Pose2D(-2.875, -7.125, 3*(Math.PI/2.0)));
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.5, 1);

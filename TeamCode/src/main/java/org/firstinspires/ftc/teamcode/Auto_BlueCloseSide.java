@@ -29,16 +29,15 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     private Servo blocker;
     int velocity = 1000;
 
-    private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
-    private final Pose launchPose1 = new Pose(58, 33, Math.toRadians(121));
-    private final Pose launchPose2 = new Pose(58, 33, Math.toRadians(121));
-    private final Pose launchPose3 = new Pose(58, 38, Math.toRadians(121));
-    private final Pose pickup1 = new Pose(51, 37, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(51, 63, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(24, 37, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(24, 63, Math.toRadians(180));
-    private final Pose control = new Pose(47,60);
-    private final Pose ending = new Pose(60,138,0);
+    private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
+    private final Pose launchPose1 = new Pose(58, 8, Math.toRadians(108));
+    private final Pose launchPose2 = new Pose(58, 15, Math.toRadians(114));
+    private final Pose launchPose3 = new Pose(58, 17, Math.toRadians(115));
+    private final Pose pickup1 = new Pose(56, 28, Math.toRadians(180));
+    private final Pose pickup2 = new Pose(56, 53, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(29, 28, Math.toRadians(180));
+    private final Pose finishPickup2 = new Pose(30, 53, Math.toRadians(180));
+    private final Pose ending = new Pose(50,30,90);
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, endPath;
@@ -70,7 +69,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 .setLinearHeadingInterpolation(pickup2.getHeading(), finishPickup2.getHeading())
                 .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierCurve(finishPickup2, control, launchPose3))
+                .addPath(new BezierCurve(finishPickup2, launchPose3))
                 .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
                 .build();
         endPath = follower.pathBuilder()
@@ -175,7 +174,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         waitForStart();
         opmodeTimer.resetTimer();
         blocker.setPosition(0.06);
-        shooter.setVelocity(1480);
+        shooter.setVelocity(1470);
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
