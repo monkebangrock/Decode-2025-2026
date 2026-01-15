@@ -30,17 +30,20 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose launchPose1 = new Pose(58, 8, Math.toRadians(108));
-    private final Pose launchPose2 = new Pose(58, 15, Math.toRadians(114));
-    private final Pose launchPose3 = new Pose(58, 17, Math.toRadians(115));
-    private final Pose pickup1 = new Pose(56, 28, Math.toRadians(180));
+    private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(108));
+    private final Pose launchPose2 = new Pose(60.5, 18.5, Math.toRadians(119));
+    private final Pose launchPose3 = new Pose(62, 21, Math.toRadians(121));
+    private final Pose launchPose4 = new Pose(50, 95.5, Math.toRadians(136));
+    private final Pose pickup1 = new Pose(56, 27, Math.toRadians(180));
     private final Pose pickup2 = new Pose(56, 53, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(29, 28, Math.toRadians(180));
+    private final Pose pickup3 = new Pose(56, 79, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(29, 27, Math.toRadians(180));
     private final Pose finishPickup2 = new Pose(30, 53, Math.toRadians(180));
+    private final Pose finishPickup3 = new Pose(33, 79, Math.toRadians(180));
     private final Pose ending = new Pose(50,30,90);
 
     private Path scorePreload;
-    private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, endPath;
+    private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
@@ -72,6 +75,18 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 .addPath(new BezierCurve(finishPickup2, launchPose3))
                 .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
                 .build();
+        beforePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(launchPose3, pickup3))
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), pickup3.getHeading())
+                .build();
+        getPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3, finishPickup3))
+                .setLinearHeadingInterpolation(pickup3.getHeading(), finishPickup3.getHeading())
+                .build();
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierCurve(finishPickup3, launchPose4))
+                .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
+                .build();
         endPath = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose3, ending))
                 .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading())
@@ -81,6 +96,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                shooter.setVelocity(1470);
                 follower.followPath(scorePreload);
                 setPathState(1);
                 break;
@@ -129,11 +145,33 @@ public class Auto_BlueCloseSide extends LinearOpMode {
             case 7:
                 if (!follower.isBusy()){
                     shoot();
-                    follower.followPath(endPath);
+                    follower.followPath(beforePickup3);
                     setPathState(8);
                 }
                 break;
             case 8:
+                if (!follower.isBusy()) {
+                    shooter.setVelocity(1270);
+                    startIntake();
+                    follower.followPath(getPickup3);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if (!follower.isBusy()) {
+                    endIntake();
+                    follower.followPath(scorePickup3);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if (!follower.isBusy()){
+                    shoot1();
+                    follower.followPath(endPath);
+                    setPathState(11);
+                }
+                break;
+            case 11:
                 if (!follower.isBusy()){
                     stopShooter();
                     setPathState(-1);
@@ -168,6 +206,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         ramp.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        blocker.setDirection(Servo.Direction.REVERSE);
 
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
@@ -199,6 +238,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         }
         blocker.setPosition(0);
         ramp.setPower(1);
+        startIntake();
         double current = getRuntime();
         while((getRuntime()<current+3)&&opModeIsActive()){
             telemetry.addData("time:",(getRuntime()-current));
@@ -210,11 +250,38 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
         ramp.setPower(0);
+        endIntake();
+        //shooter.setMotorDisable();
+    }
+
+    public void shoot1() {
+        shooter.setMotorEnable();
+        blocker.setPosition(0.17);
+        while((shooter.getVelocity() >= 1260)&&opModeIsActive()){
+            telemetry.addData("velocity",shooter.getVelocity());
+            shooter.setVelocity(1260);
+            telemetry.update();
+        }
+        blocker.setPosition(0);
+        ramp.setPower(1);
+        startIntake();
+        double current = getRuntime();
+        while((getRuntime()<current+3)&&opModeIsActive()){
+            telemetry.addData("time:",(getRuntime()-current));
+            telemetry.update();
+        }
+        //shooter.setVelocity(0);
+        blocker.setPosition(0.17);
+        //shooter.setPower(0);
+        telemetry.addData("velocity",shooter.getVelocity());
+        // pusher.setPower(0);
+        ramp.setPower(0);
+        endIntake();
         //shooter.setMotorDisable();
     }
 
     public void startIntake(){
-        intake.setPower(0.7);
+        intake.setPower(0.5);
         ramp.setPower(0.6);
     }
 
