@@ -115,6 +115,7 @@ public class Main100Percent extends LinearOpMode {
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
+        blocker.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -143,7 +144,7 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        blocker.setPosition(0.06);
+        blocker.setPosition(0.17);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
 
@@ -239,7 +240,7 @@ public class Main100Percent extends LinearOpMode {
             rampMoving1 = true;
         } else if (!gamepad2.left_bumper && rightBumperPressed) {
             rightBumperPressed = false;
-            blocker.setPosition(0.06);
+            blocker.setPosition(0.17);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;
@@ -259,16 +260,23 @@ public class Main100Percent extends LinearOpMode {
             shooterActive=false;
         }
 
-        if(gamepad2.dpad_up && !dpadUpPressed){
-            adjustment+=10;
-            dpadUpPressed=true;
-        }
-        else{
+        if (gamepad2.dpad_up) {
+            if (!dpadUpPressed) {
+                // only do the 1st time button pressed
+                adjustment+=10;
+                dpadUpPressed=true;
+            }
+        } else {
+            // button released
             dpadUpPressed=false;
         }
-        if(gamepad2.dpad_down && !dpadDownPressed){
-            adjustment-=10;
-            dpadDownPressed=true;
+
+        if(gamepad2.dpad_down){
+            if (!dpadDownPressed) {
+                // only do the 1st time button pressed
+                adjustment-=10;
+                dpadDownPressed=true;
+            }
         }
         else{
             dpadDownPressed=false;

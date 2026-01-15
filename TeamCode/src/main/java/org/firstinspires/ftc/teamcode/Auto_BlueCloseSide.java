@@ -173,7 +173,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
 
         waitForStart();
         opmodeTimer.resetTimer();
-        blocker.setPosition(0.06);
+        blocker.setPosition(0.17);
         shooter.setVelocity(1470);
         setPathState(0);
         while (opModeIsActive()) {
@@ -191,7 +191,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
 
     public void shoot() {
         shooter.setMotorEnable();
-        blocker.setPosition(0.08);
+        blocker.setPosition(0.17);
         while((shooter.getVelocity() <= 1470)&&opModeIsActive()){
             telemetry.addData("velocity",shooter.getVelocity());
             shooter.setVelocity(1470);
@@ -205,7 +205,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
             telemetry.update();
         }
         //shooter.setVelocity(0);
-        blocker.setPosition(0.06);
+        blocker.setPosition(0.17);
         //shooter.setPower(0);
         telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
