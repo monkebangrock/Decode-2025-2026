@@ -174,7 +174,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
         waitForStart();
         opmodeTimer.resetTimer();
-        blocker.setPosition(0.06);
+        blocker.setPosition(0.17);
         rightShooter.setVelocity(1250);
         setPathState(0);
         while (opModeIsActive()) {
@@ -192,7 +192,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
     public void shoot() {
         rightShooter.setMotorEnable();
-        blocker.setPosition(0.08);
+        blocker.setPosition(0.17);
         while((rightShooter.getVelocity() <= 1250)&&opModeIsActive()){
             telemetry.addData("velocity",rightShooter.getVelocity());
             rightShooter.setVelocity(1250);
@@ -206,7 +206,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
             telemetry.update();
         }
         //rightShooter.setVelocity(0);
-        blocker.setPosition(0.06);
+        blocker.setPosition(0.17);
         //rightShooter.setPower(0);
         telemetry.addData("velocity",rightShooter.getVelocity());
         // pusher.setPower(0);
