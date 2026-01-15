@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,10 +16,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.util.List;
 
 @TeleOp
 //@Disabled
@@ -45,6 +51,7 @@ public class Main100Percent extends LinearOpMode {
     boolean rampMoving2 = false;
     int rampTargetPosition = 0;
     int velocity = 1300;
+    int drivingSpeed=5000;
     long timer = 0;
     double servoPosition = 0.0;
     double distance;
@@ -53,6 +60,7 @@ public class Main100Percent extends LinearOpMode {
     double limelightLensHeightInches = 16.75;
     double goalHeightInches = 29.5;
     int adjustment=0;
+    Pose3D botpose;
     LLResult llResult;
     SparkFunOTOS otos;
     Limelight3A limelight;
@@ -75,6 +83,7 @@ public class Main100Percent extends LinearOpMode {
         leftLight = hardwareMap.get(Servo.class, "leftLight");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
 
 
         //reset encoder
@@ -139,10 +148,10 @@ public class Main100Percent extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
-        leftFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        leftBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        leftFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         blocker.setPosition(0.17);
         rightLight.setPosition(1);
@@ -176,6 +185,7 @@ public class Main100Percent extends LinearOpMode {
 
             double botHeading = Math.toRadians(otos.getPosition().h);
             llResult = limelight.getLatestResult();
+            botpose = llResult.getBotpose_MT2();
             //imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             // Rotate the movement direction counter to the bot's rotation
@@ -193,10 +203,17 @@ public class Main100Percent extends LinearOpMode {
             double frontRightPower = (rotY - rotX - rxscaled) / denominator;
             double backRightPower = (rotY + rotX - rxscaled) / denominator;
 
-            leftFront.setPower(frontLeftPower);
-            leftBack.setPower(backLeftPower);
-            rightFront.setPower(frontRightPower);
-            rightBack.setPower(backRightPower);
+            leftFront.setVelocity(frontLeftPower*drivingSpeed);
+            leftBack.setVelocity(backLeftPower*drivingSpeed);
+            rightFront.setVelocity(frontRightPower*drivingSpeed);
+            rightBack.setVelocity(backRightPower*drivingSpeed);
+
+            if(gamepad1.left_bumper){
+                drivingSpeed=1000;
+            }
+            else{
+                drivingSpeed=5000;
+            }
 
             intake();
             shooter();
@@ -206,6 +223,13 @@ public class Main100Percent extends LinearOpMode {
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
+            double bp_x = botpose.getPosition().x;
+            double bp_y = botpose.getPosition().y;
+            double angle = Math.atan(x/y);
+            telemetry.addData("Botpose X: ", bp_x);
+            telemetry.addData("Botpose Y: ", bp_y);
+            telemetry.addData("Angle: ", angle);
+            telemetry.addData("Botpose", botpose.toString());
             telemetry.addData("imu output: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
             //telemetry.update();
         }
@@ -292,7 +316,6 @@ public class Main100Percent extends LinearOpMode {
 
     public void setSpeed(){
         if (llResult !=null && llResult.isValid()){
-            Pose3D botpose = llResult.getBotpose_MT2();
             angleToGoalDegrees = llResult.getTy();
             angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
             distance = (goalHeightInches-limelightLensHeightInches)/Math.tan(angleToGoalRadians);
@@ -323,7 +346,8 @@ public class Main100Percent extends LinearOpMode {
     public void align(){
         if (llResult !=null && llResult.isValid()){
             double centeredTx=Math.tan(6/distance);
-            double disalignment=llResult.getTx()-centeredTx;
+
+            double disalignment=llResult.getTx();//-centeredTx;
             if(disalignment<-5){
                 rightLight.setPosition(.3);
                 //leftLight.setPosition(.277);
