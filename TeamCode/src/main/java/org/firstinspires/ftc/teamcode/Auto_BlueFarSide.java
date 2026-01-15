@@ -22,7 +22,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    private DcMotorEx rightShooter;
+    private DcMotorEx shooter;
     private DcMotorEx ramp;
     private DcMotorEx intake;
     private int pathState;
@@ -30,13 +30,13 @@ public class Auto_BlueFarSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
-    private final Pose launchPose1 = new Pose(42.5, 100, Math.toRadians(132));
+    private final Pose launchPose1 = new Pose(39.5, 98, Math.toRadians(132));
     private final Pose launchPose2 = new Pose(45, 95, Math.toRadians(135));
     private final Pose launchPose3 = new Pose(50,90,Math.toRadians(131));
     private final Pose pickup1 = new Pose(51, 89, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(51, 64, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(24, 89, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(24, 64, Math.toRadians(180));
+    private final Pose pickup2 = new Pose(51, 59, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(23, 89, Math.toRadians(180));
+    private final Pose finishPickup2 = new Pose(23, 59, Math.toRadians(180));
     private final Pose control = new Pose(47,60);
     private final Pose ending = new Pose(60,138,0);
 
@@ -157,25 +157,25 @@ public class Auto_BlueFarSide extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
-        rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         blocker = hardwareMap.get(Servo.class, "blocker");
 
-        rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        rightShooter.setDirection(DcMotor.Direction.REVERSE);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooter.setDirection(DcMotor.Direction.REVERSE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        rightShooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
+        shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
         waitForStart();
         opmodeTimer.resetTimer();
         blocker.setPosition(0.06);
-        rightShooter.setVelocity(1250);
+        shooter.setVelocity(1250);
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
@@ -191,11 +191,11 @@ public class Auto_BlueFarSide extends LinearOpMode {
     }
 
     public void shoot() {
-        rightShooter.setMotorEnable();
+        shooter.setMotorEnable();
         blocker.setPosition(0.08);
-        while((rightShooter.getVelocity() <= 1250)&&opModeIsActive()){
-            telemetry.addData("velocity",rightShooter.getVelocity());
-            rightShooter.setVelocity(1250);
+        while((shooter.getVelocity() <= 1250)&&opModeIsActive()){
+            telemetry.addData("velocity",shooter.getVelocity());
+            shooter.setVelocity(1250);
             telemetry.update();
         }
         blocker.setPosition(0);
@@ -205,13 +205,13 @@ public class Auto_BlueFarSide extends LinearOpMode {
             telemetry.addData("time:",(getRuntime()-current));
             telemetry.update();
         }
-        //rightShooter.setVelocity(0);
+        //shooter.setVelocity(0);
         blocker.setPosition(0.06);
-        //rightShooter.setPower(0);
-        telemetry.addData("velocity",rightShooter.getVelocity());
+        //shooter.setPower(0);
+        telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
         ramp.setPower(0);
-        //rightShooter.setMotorDisable();
+        //shooter.setMotorDisable();
     }
 
     public void startIntake(){
@@ -225,9 +225,9 @@ public class Auto_BlueFarSide extends LinearOpMode {
     }
 
     public void stopShooter(){
-        rightShooter.setVelocity(0);
-        rightShooter.setPower(0);
-        rightShooter.setMotorDisable();
+        shooter.setVelocity(0);
+        shooter.setPower(0);
+        shooter.setMotorDisable();
     }
 }
 
