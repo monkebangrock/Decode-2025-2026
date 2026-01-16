@@ -418,22 +418,24 @@ public class Main100Percent extends LinearOpMode {
 
     public void autoAlign() {
         if (gamepad2.x && !xPressed && llResult.isValid()) {
-            // on first pressing x
-            xPressed = true;
-            while(getTargetInfo().bearing<-5 && opModeIsActive()){
-                turnLeft(.25);
-            }
-            while(getTargetInfo().bearing<-10 && opModeIsActive()){
-                turnLeft(.5);
-            }
-            while(getTargetInfo().bearing>5 && opModeIsActive()){
-                turnRight(.25);
-            }
-            while(getTargetInfo().bearing>10 && opModeIsActive()){
-                turnRight(.5);
+            if(Math.abs(getTargetInfo().bearing)>2) {
+                // on first pressing x
+                xPressed = true;
+                while (getTargetInfo().bearing < -5 && opModeIsActive()) {
+                    turnLeft(.4);
+                }
+                while (getTargetInfo().bearing < -10 && opModeIsActive()) {
+                    turnLeft(.7);
+                }
+                while (getTargetInfo().bearing > 5 && opModeIsActive()) {
+                    turnRight(.4);
+                }
+                while (getTargetInfo().bearing > 10 && opModeIsActive()) {
+                    turnRight(.7);
+                }
             }
 
-        } else if (xPressed && !gamepad2.x) {
+        } else if (xPressed && !gamepad1.x) {
             // x was pressed, but not pressed any longer
             xPressed = false;
         }
