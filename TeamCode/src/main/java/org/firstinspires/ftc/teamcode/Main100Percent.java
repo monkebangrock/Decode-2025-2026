@@ -441,9 +441,9 @@ public class Main100Percent extends LinearOpMode {
 
     public void turnRight(double rot){
         leftFront.setPower(rot);
-        rightFront.setPower(rot);
+        rightFront.setPower(-rot);
         leftBack.setPower(rot);
-        rightBack.setPower(rot);
+        rightBack.setPower(-rot);
 
         /*leftFront.setVelocity(1500);
         rightFront.setVelocity(1500);
@@ -475,9 +475,9 @@ public class Main100Percent extends LinearOpMode {
 
     public void turnLeft(double rot){
         leftFront.setPower(-rot);
-        rightFront.setPower(-rot);
+        rightFront.setPower(rot);
         leftBack.setPower(-rot);
-        rightBack.setPower(-rot);
+        rightBack.setPower(rot);
 
         /*leftFront.setVelocity(1500);
         rightFront.setVelocity(1500);
