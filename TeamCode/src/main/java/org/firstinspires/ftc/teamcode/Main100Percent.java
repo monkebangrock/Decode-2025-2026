@@ -47,7 +47,7 @@ public class Main100Percent extends LinearOpMode {
     boolean dpadDownPressed = false;
     boolean dpadUpPressed = false;
     boolean rightBumperPressed = false;
-    boolean xPressed = false;
+    boolean aPressed = false;
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
 
@@ -417,10 +417,10 @@ public class Main100Percent extends LinearOpMode {
     }
 
     public void autoAlign() {
-        if (gamepad2.x && !xPressed && llResult.isValid()) {
+        if (gamepad1.a && !aPressed && llResult.isValid()) {
             if(Math.abs(getTargetInfo().bearing)>2) {
                 // on first pressing x
-                xPressed = true;
+                aPressed = true;
                 while (getTargetInfo().bearing < -5 && opModeIsActive()) {
                     turnLeft(.4);
                 }
@@ -435,9 +435,9 @@ public class Main100Percent extends LinearOpMode {
                 }
             }
 
-        } else if (xPressed && !gamepad1.x) {
+        } else if (aPressed && !gamepad1.a) {
             // x was pressed, but not pressed any longer
-            xPressed = false;
+            aPressed = false;
         }
     }
 
