@@ -417,7 +417,7 @@ public class Main100Percent extends LinearOpMode {
     }
 
     public void autoAlign() {
-        if (gamepad2.x && !xPressed) {
+        if (gamepad2.x && !xPressed && llResult.isValid()) {
             // on first pressing x
             xPressed = true;
             while(getTargetInfo().bearing<-5 && opModeIsActive()){
