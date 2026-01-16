@@ -1,66 +1,102 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+import java.util.List;
 
+@TeleOp(name = "Limelight Test", group = "TeleOp")
+public class LimelightTesting extends LinearOpMode {
 
-@TeleOp
-public class LimelightTesting extends OpMode {
-    //calculate distance
-    double distance;
-    double angleToGoalDegrees;
-    double angleToGoalRadians;
-    // distance from the center of the Limelight lens to the floor
-    double limelightLensHeightInches = 16.75;
-    // distance from the target to the floor
-    double goalHeightInches = 29.5;
+    private Limelight3A limelight;
 
+    // POI offset from AprilTag (in meters)
+    private static final double POI_BEHIND = 0.2;
+    private static final double POI_UP = 0.25;
 
+    public static class TargetInfo {
+        public final double bearing;   // degrees
+        public final double distance;  // meters
 
-    private ElapsedTime runtime = new ElapsedTime();
-    SparkFunOTOS otos;
-    Limelight3A limelight;
+        public TargetInfo(double bearing, double distance) {
+            this.bearing = bearing;
+            this.distance = distance;
+        }
+    }
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight.pipelineSwitch(0);
-        otos.calibrateImu();
-    }
-
-    @Override
-    public void start(){
         limelight.start();
-    }
 
-    @Override
-    public void loop(){
-        LLResult llResult = limelight.getLatestResult();
-        if (llResult !=null && llResult.isValid()){
-            Pose3D botpose = llResult.getBotpose_MT2();
-            angleToGoalDegrees = llResult.getTy();
-            angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-            distance = (goalHeightInches-limelightLensHeightInches)/Math.tan(angleToGoalRadians);
-            telemetry.addData("Calculated Distance", distance);
-            telemetry.addData("Target X", llResult.getTx());
-            telemetry.addData("Target area", llResult.getTa());
-            telemetry.addData("Botpose", botpose.toString());
+        waitForStart();
+
+        while (opModeIsActive()) {
+            TargetInfo target = getTargetInfo();
+
+            if (target != null) {
+                telemetry.addData("Bearing", "%.2f°", target.bearing);
+                telemetry.addData("Distance", "%.3f m", target.distance);
+            } else {
+                telemetry.addLine("No target");
+            }
+
             telemetry.update();
         }
 
+        limelight.stop();
+    }
+
+    public TargetInfo getTargetInfo() {
+        LLResult result = limelight.getLatestResult();
+
+        if (result == null || !result.isValid()) {
+            return null;
+        }
+
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+
+        if (fiducials.isEmpty()) {
+            return null;
+        }
+
+        LLResultTypes.FiducialResult tag = fiducials.get(0);
+        Pose3D robotInTarget = tag.getRobotPoseTargetSpace();
+
+        if (robotInTarget == null) {
+            return null;
+        }
+
+        // Robot position in tag space
+        double robotX = robotInTarget.getPosition().x;
+        double robotY = robotInTarget.getPosition().y;
+        double robotZ = robotInTarget.getPosition().z;
+
+        // Robot heading (pitch is turn axis in this coordinate system)
+        double robotHeading = robotInTarget.getOrientation().getPitch();
+
+        // Vector from robot to POI (in tag space)
+        double toPoiX = 0 - robotX;
+        double toPoiY = POI_UP - robotY;
+        double toPoiZ = POI_BEHIND - robotZ;
+
+        // Direction to POI, minus robot heading = relative bearing
+        double bearing = Math.toDegrees(Math.atan2(toPoiX, toPoiZ)) - robotHeading;
+
+        // Normalize to -180 to 180
+        while (bearing > 180) bearing -= 360;
+        while (bearing < -180) bearing += 360;
+
+        // 3D distance
+        double distance = Math.sqrt(toPoiX * toPoiX + toPoiY * toPoiY + toPoiZ * toPoiZ);
+
+        return new TargetInfo(bearing, distance);
     }
 }
