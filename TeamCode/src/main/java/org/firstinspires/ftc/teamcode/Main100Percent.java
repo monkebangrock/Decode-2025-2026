@@ -222,6 +222,7 @@ public class Main100Percent extends LinearOpMode {
             shooter();
             setSpeed();
             align();
+            autoAlign();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
@@ -415,34 +416,94 @@ public class Main100Percent extends LinearOpMode {
         return new LimelightTesting.TargetInfo(bearing, distance);
     }
 
-    public void turnRight(int deg){
-        int target = deg*600;
-        while (leftFront.getCurrentPosition() < leftFront.getTargetPosition() && opModeIsActive()) {
-            leftFront.setVelocity(1000);
-            rightFront.setVelocity(1000);
-            leftBack.setVelocity(1000);
-            rightBack.setVelocity(1000);
-            leftFront.setTargetPosition(target);
-            rightFront.setTargetPosition(target);
-            leftBack.setTargetPosition(target);
-            rightBack.setTargetPosition(target);
-            telemetry.update();
+    public void autoAlign() {
+        if (gamepad2.x && !xPressed) {
+            // on first pressing x
+            xPressed = true;
+            while(getTargetInfo().bearing<-5 && opModeIsActive()){
+                turnLeft(.25);
+            }
+            while(getTargetInfo().bearing<-10 && opModeIsActive()){
+                turnLeft(.5);
+            }
+            while(getTargetInfo().bearing>5 && opModeIsActive()){
+                turnRight(.25);
+            }
+            while(getTargetInfo().bearing>10 && opModeIsActive()){
+                turnRight(.5);
+            }
+
+        } else if (xPressed && !gamepad2.x) {
+            // x was pressed, but not pressed any longer
+            xPressed = false;
         }
     }
 
-    public void turnLeft(int deg){
-        int target = deg*600;
-        while (leftFront.getCurrentPosition() < leftFront.getTargetPosition() && opModeIsActive()) {
-            leftFront.setVelocity(-1000);
-            rightFront.setVelocity(-1000);
-            leftBack.setVelocity(-1000);
-            rightBack.setVelocity(-1000);
-            leftFront.setTargetPosition(target);
-            rightFront.setTargetPosition(target);
-            leftBack.setTargetPosition(target);
-            rightBack.setTargetPosition(target);
-            telemetry.update();
-        }
+    public void turnRight(double rot){
+        leftFront.setPower(rot);
+        rightFront.setPower(rot);
+        leftBack.setPower(rot);
+        rightBack.setPower(rot);
+
+        /*leftFront.setVelocity(1500);
+        rightFront.setVelocity(1500);
+        leftBack.setVelocity(1500);
+        rightBack.setVelocity(1500);
+
+        int leftFrontTargetPos = leftFront.getCurrentPosition() + rot;
+        int rightFrontTargetPos = rightFront.getCurrentPosition() + rot;
+        int leftBackTargetPos = leftBack.getCurrentPosition() + rot;
+        int rightBackTargetPos = rightBack.getCurrentPosition() + rot;
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftFront.setTargetPosition(leftFrontTargetPos);
+        rightFront.setTargetPosition(rightFrontTargetPos);
+        leftBack.setTargetPosition(leftBackTargetPos);
+        rightBack.setTargetPosition(rightBackTargetPos);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+
+        telemetry.update();
+    }
+
+    public void turnLeft(double rot){
+        leftFront.setPower(-rot);
+        rightFront.setPower(-rot);
+        leftBack.setPower(-rot);
+        rightBack.setPower(-rot);
+
+        /*leftFront.setVelocity(1500);
+        rightFront.setVelocity(1500);
+        leftBack.setVelocity(1500);
+        rightBack.setVelocity(1500);
+        int leftFrontTargetPos = leftFront.getCurrentPosition() - rot;
+        int rightFrontTargetPos = rightFront.getCurrentPosition() - rot;
+        int leftBackTargetPos = leftBack.getCurrentPosition() - rot;
+        int rightBackTargetPos = rightBack.getCurrentPosition() - rot;
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftFront.setTargetPosition(leftFrontTargetPos);
+        rightFront.setTargetPosition(rightFrontTargetPos);
+        leftBack.setTargetPosition(leftBackTargetPos);
+        rightBack.setTargetPosition(rightBackTargetPos);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+
+        telemetry.update();
     }
 
 }
