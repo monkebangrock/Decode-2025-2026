@@ -42,6 +42,7 @@ public class Main100Percent extends LinearOpMode {
     private Servo blocker=null;
     private Servo rightLight=null;
     private Servo leftLight=null;
+
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
     boolean dpadUpPressed = false;
@@ -49,17 +50,23 @@ public class Main100Percent extends LinearOpMode {
     boolean xPressed = false;
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
+
     int rampTargetPosition = 0;
     int velocity = 1300;
     int drivingSpeed=5000;
+    int adjustment=0;
+
     long timer = 0;
+
     double servoPosition = 0.0;
     double distance;
     double angleToGoalDegrees;
     double angleToGoalRadians;
     double limelightLensHeightInches = 16.75;
     double goalHeightInches = 29.5;
-    int adjustment=0;
+    double POI_Behind = 0.2;
+    double POI_Up = 0.25;
+
     Pose3D botpose;
     LLResult llResult;
     SparkFunOTOS otos;
@@ -84,8 +91,6 @@ public class Main100Percent extends LinearOpMode {
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-
-
         //reset encoder
         leftFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -106,7 +111,6 @@ public class Main100Percent extends LinearOpMode {
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
-
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -131,7 +135,6 @@ public class Main100Percent extends LinearOpMode {
         otos.setPosition(currentPosition);
         limelight.pipelineSwitch(0);
 
-
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
@@ -153,7 +156,7 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        blocker.setPosition(0.17);
+        blocker.setPosition(0.33);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
 
@@ -209,17 +212,16 @@ public class Main100Percent extends LinearOpMode {
             rightBack.setVelocity(backRightPower*drivingSpeed);
 
             if(gamepad1.left_bumper){
-                drivingSpeed=1000;
+                drivingSpeed=500;
             }
             else{
-                drivingSpeed=5000;
+                drivingSpeed=2788;
             }
 
             intake();
             shooter();
             setSpeed();
             align();
-            unjam();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
@@ -264,7 +266,7 @@ public class Main100Percent extends LinearOpMode {
             rampMoving1 = true;
         } else if (!gamepad2.left_bumper && rightBumperPressed) {
             rightBumperPressed = false;
-            blocker.setPosition(0.17);
+            blocker.setPosition(0.33);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;
@@ -318,7 +320,12 @@ public class Main100Percent extends LinearOpMode {
         if (llResult !=null && llResult.isValid()){
             angleToGoalDegrees = llResult.getTy();
             angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-            distance = (goalHeightInches-limelightLensHeightInches)/Math.tan(angleToGoalRadians);
+        }
+        if(Math.abs(shooter.getVelocity()-velocity)<40){
+            rightLight.setPosition(0.5);
+        }
+        else{
+            rightLight.setPosition(1);
         }
         if(distance<=50){
             velocity=1300+adjustment;
@@ -344,53 +351,68 @@ public class Main100Percent extends LinearOpMode {
     }
 
     public void align(){
-        if (llResult !=null && llResult.isValid()){
-            double centeredTx=Math.tan(6/distance);
-
-            double disalignment=llResult.getTx();//-centeredTx;
-            if(disalignment<-5){
-                rightLight.setPosition(.3);
-                //leftLight.setPosition(.277);
+        LimelightTesting.TargetInfo target = getTargetInfo();
+        if (target != null) {
+            distance=target.distance;
+            if(target.bearing<-5){
+                leftLight.setPosition(.3);
             }
-            else if(disalignment>5){
-                rightLight.setPosition(.611);
-                //leftLight.setPosition(.277);
+            else if(target.bearing>5){
+                leftLight.setPosition(.611);
             }
-            else if(Math.abs(disalignment)<15 && Math.abs(disalignment)>1){
-                rightLight.setPosition(0.388);
+            else if(Math.abs(target.bearing)<15 && Math.abs(target.bearing)>1){
+                leftLight.setPosition(0.388);
             }
             else{
-                rightLight.setPosition(0.5);
                 leftLight.setPosition(0.5);
             }
-            telemetry.addData("Tx", llResult.getTx());
-            telemetry.addData("disalignment", llResult.getTx()-centeredTx);
-            telemetry.update();
+            telemetry.addData("Bearing", "%.2f°", target.bearing);
+            telemetry.addData("Distance", "%.3f m", target.distance);
+        } else {
+            leftLight.setPosition(1);
+            telemetry.addLine("No target");
         }
     }
 
-    public void unjam(){
-        if(gamepad2.x && !xPressed) {
-            // on first pressing x
-            xPressed = true;
-            rampMoving2 = true;
-            rampTargetPosition = ramp.getCurrentPosition() - 100;
-            ramp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ramp.setPower(1.0);
-            ramp.setTargetPosition(rampTargetPosition);
-            ramp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ramp.setMotorEnable();
-        } else if (xPressed && !gamepad2.x) {
-            // x was pressed, but not pressed any longer
-            xPressed = false;
-        } else {
-            if (rampMoving2 && ramp.getCurrentPosition() <= rampTargetPosition &&!gamepad2.left_bumper){
-                // Done moving ramp -- go back to RUN_WITHOUT_ENCODER mode
-                ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                ramp.setMotorDisable();
-                rampMoving2 = false;
-            }
+    public LimelightTesting.TargetInfo getTargetInfo() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) {
+            return null;
         }
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        if (fiducials.isEmpty()) {
+            return null;
+        }
+        LLResultTypes.FiducialResult tag = fiducials.get(0);
+        Pose3D robotInTarget = tag.getRobotPoseTargetSpace();
+        if (robotInTarget == null) {
+            return null;
+        }
+
+        // Robot position in tag space
+        double robotX = robotInTarget.getPosition().x;
+        double robotY = robotInTarget.getPosition().y;
+        double robotZ = robotInTarget.getPosition().z;
+
+        // Robot heading (pitch is turn axis in this coordinate system)
+        double robotHeading = robotInTarget.getOrientation().getPitch();
+
+        // Vector from robot to POI (in tag space)
+        double toPoiX = 0 - robotX;
+        double toPoiY = POI_Up - robotY;
+        double toPoiZ = POI_Behind - robotZ;
+
+        // Direction to POI, minus robot heading = relative bearing
+        double bearing = Math.toDegrees(Math.atan2(toPoiX, toPoiZ)) - robotHeading;
+
+        // Normalize to -180 to 180
+        while (bearing > 180) bearing -= 360;
+        while (bearing < -180) bearing += 360;
+
+        // 3D distance
+        double distance = Math.sqrt(toPoiX * toPoiX + toPoiY * toPoiY + toPoiZ * toPoiZ);
+
+        return new LimelightTesting.TargetInfo(bearing, distance);
     }
 
     public void turnRight(int deg){
