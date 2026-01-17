@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -21,63 +22,84 @@ public class Auto_RedFarSide extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    private DcMotorEx rightShooter;
+    private DcMotorEx shooter;
     private DcMotorEx ramp;
     private DcMotorEx intake;
-    private Servo tapper;
     private int pathState;
+    private Servo blocker;
     int velocity = 1000;
 
-    private final Pose startPose = new Pose(123, 124, Math.toRadians(216));
-    private final Pose launchPose = new Pose(101.5, 105, Math.toRadians(236));
-    private final Pose pickup1 = new Pose(96, 84, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(96, 54, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(125, 84, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(125, 59, Math.toRadians(180));
-    private final Pose ending = new Pose(84,130,0);
+    private final Pose startPose = new Pose(123, 124, Math.toRadians(36));
+    private final Pose launchPose1 = new Pose(94, 88, Math.toRadians(46));
+    private final Pose launchPose2 = new Pose(91, 85, Math.toRadians(41));
+    private final Pose launchPose3 = new Pose(90,86,Math.toRadians(41));
+    private final Pose launchPose4 = new Pose(79,95,Math.toRadians(29));
+    private final Pose pickup1 = new Pose(93, 86, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(94, 65, Math.toRadians(1));
+    private final Pose pickup3 = new Pose(94, 42, Math.toRadians(1));
+    private final Pose finishPickup1 = new Pose(128, 86, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(132, 65, Math.toRadians(0));
+    private final Pose finishPickup3 = new Pose(131, 42, Math.toRadians(0));
+    private final Pose control = new Pose(80,69);
+    private final Pose control1 = new Pose(97,60);
+    private final Pose control2 = new Pose(80,45);
+    private final Pose ending = new Pose(79,95,Math.toRadians(29));
 
     private Path scorePreload;
-    private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, endPath;
+    private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3,endPath;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(startPose, launchPose));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
+        scorePreload = new Path(new BezierLine(startPose, launchPose1));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), launchPose1.getHeading());
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
         beforePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup1))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup1.getHeading())
+                .addPath(new BezierLine(launchPose2, pickup1))
+                .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup1.getHeading())
                 .build();
         getPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1, finishPickup1))
                 .setLinearHeadingInterpolation(pickup1.getHeading(), finishPickup1.getHeading())
                 .build();
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(finishPickup1, launchPose))
-                .setLinearHeadingInterpolation(finishPickup1.getHeading(), launchPose.getHeading())
+                .addPath(new BezierLine(finishPickup1, launchPose2))
+                .setLinearHeadingInterpolation(finishPickup1.getHeading(), launchPose2.getHeading())
                 .build();
         beforePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup2))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup2.getHeading())
+                .addPath(new BezierCurve(launchPose2,control,pickup2))
+                .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup2.getHeading())
                 .build();
         getPickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup2, finishPickup2))
                 .setLinearHeadingInterpolation(pickup2.getHeading(), finishPickup2.getHeading())
                 .build();
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(finishPickup2, launchPose))
-                .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose.getHeading())
+                .addPath(new BezierCurve(finishPickup2, control1, launchPose3))
+                .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
+                .build();
+        beforePickup3 = follower.pathBuilder()
+                .addPath(new BezierCurve(launchPose3, control2, pickup3))
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), pickup3.getHeading())
+                .build();
+        getPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(pickup3, finishPickup3))
+                .setLinearHeadingInterpolation(pickup3.getHeading(), finishPickup3.getHeading())
+                .build();
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(finishPickup3, launchPose4))
+                .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
                 .build();
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, ending))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), ending.getHeading())
+                .addPath(new BezierLine(launchPose4, ending))
+                .setLinearHeadingInterpolation(launchPose4.getHeading(), ending.getHeading())
                 .build();
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                shooter.setVelocity(1270);
                 follower.followPath(scorePreload);
                 setPathState(1);
                 break;
@@ -97,7 +119,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    endIntake();
+                    //endIntake();
                     follower.followPath(scorePickup1);
                     setPathState(4);
                 }
@@ -118,7 +140,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    endIntake();
+                    //endIntake();
                     follower.followPath(scorePickup2);
                     setPathState(7);
                 }
@@ -126,7 +148,34 @@ public class Auto_RedFarSide extends LinearOpMode {
             case 7:
                 if (!follower.isBusy()){
                     shoot();
+                    follower.followPath(beforePickup3);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if (!follower.isBusy()) {
+                    startIntake();
+                    follower.followPath(getPickup3);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if (!follower.isBusy()) {
+                    //endIntake();
+                    follower.followPath(scorePickup3);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if (!follower.isBusy()){
+                    shoot();
                     follower.followPath(endPath);
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                if (!follower.isBusy()){
+                    stopShooter();
                     setPathState(-1);
                 }
                 break;
@@ -147,22 +196,26 @@ public class Auto_RedFarSide extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
-        rightShooter = hardwareMap.get(DcMotorEx.class, "rightShooter");
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
-        tapper = hardwareMap.get(Servo.class, "tapper");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
+        blocker = hardwareMap.get(Servo.class, "blocker");
 
-        rightShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooter.setDirection(DcMotor.Direction.REVERSE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        blocker.setDirection(Servo.Direction.REVERSE);
 
-        rightShooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
+        shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
         waitForStart();
         opmodeTimer.resetTimer();
+        blocker.setPosition(0.33);
+        shooter.setVelocity(1260);
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
@@ -178,46 +231,44 @@ public class Auto_RedFarSide extends LinearOpMode {
     }
 
     public void shoot() {
-        rightShooter.setMotorEnable();
-        while((rightShooter.getVelocity() != 1200)&&opModeIsActive()){
-            telemetry.addData("velocity",rightShooter.getVelocity());
-            rightShooter.setVelocity(1200);
-            if(rightShooter.getVelocity()>=900){
-                break;
-            }
+        shooter.setMotorEnable();
+        blocker.setPosition(0.33);
+        while((shooter.getVelocity() <= 1260)&&opModeIsActive()){
+            telemetry.addData("velocity",shooter.getVelocity());
+            shooter.setVelocity(1260);
             telemetry.update();
         }
-        //pusher.setPower(1);
-        ramp.setPower(0.5);
+        blocker.setPosition(0);
+        ramp.setPower(1);
+        startIntake();
         double current = getRuntime();
-        while((getRuntime()<current+2)&&opModeIsActive()){
-            if(getRuntime()>=current+0.8){
-                tapper.setPosition(0.03);
-            }
+        while((getRuntime()<current+3)&&opModeIsActive()){
             telemetry.addData("time:",(getRuntime()-current));
             telemetry.update();
         }
-        tapper.setPosition(0);
-        while((rightShooter.getVelocity() != 0)&&opModeIsActive()){
-            telemetry.addData("velocity",rightShooter.getVelocity());
-            rightShooter.setVelocity(0);
-            telemetry.update();
-        }
-        rightShooter.setPower(0);
-        telemetry.addData("velocity",rightShooter.getVelocity());
+        //shooter.setVelocity(0);
+        blocker.setPosition(0.33);
+        //shooter.setPower(0);
+        telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
         ramp.setPower(0);
-        rightShooter.setMotorDisable();
+        endIntake();
+        //shooter.setMotorDisable();
     }
 
     public void startIntake(){
-        intake.setPower(0.5);
-        ramp.setPower(0.75);
+        intake.setPower(0.45);
+        ramp.setPower(0.6);
     }
 
     public void endIntake(){
         intake.setPower(0);
         ramp.setPower(0);
     }
-}
 
+    public void stopShooter(){
+        shooter.setVelocity(0);
+        shooter.setPower(0);
+        shooter.setMotorDisable();
+    }
+}

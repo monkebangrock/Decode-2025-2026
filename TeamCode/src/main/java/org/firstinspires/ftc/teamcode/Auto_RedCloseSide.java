@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous
-public class Auto_BlueCloseSide extends LinearOpMode {
+public class Auto_RedCloseSide extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
@@ -29,18 +29,18 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     private Servo blocker;
     int velocity = 1000;
 
-    private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(109));
-    private final Pose launchPose2 = new Pose(60.5, 18.5, Math.toRadians(118));
-    private final Pose launchPose3 = new Pose(62, 21, Math.toRadians(120));
-    private final Pose launchPose4 = new Pose(65, 95, Math.toRadians(151));
-    private final Pose pickup1 = new Pose(56, 27, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(56, 53, Math.toRadians(180));
-    private final Pose pickup3 = new Pose(56, 79, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(29, 27, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(30, 53, Math.toRadians(180));
-    private final Pose finishPickup3 = new Pose(33, 79, Math.toRadians(180));
-    private final Pose ending = new Pose(57,115,146);
+    private final Pose startPose = new Pose(88, 8, Math.toRadians(90));
+    private final Pose launchPose1 = new Pose(86, 10, Math.toRadians(71));
+    private final Pose launchPose2 = new Pose(85.5, 26.5, Math.toRadians(62));
+    private final Pose launchPose3 = new Pose(85, 29, Math.toRadians(60));
+    private final Pose launchPose4 = new Pose(85, 115, Math.toRadians(29));
+    private final Pose pickup1 = new Pose(103, 47, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(108,75 , Math.toRadians(0));
+    private final Pose pickup3 = new Pose(108, 98, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(132, 47, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(132, 75, Math.toRadians(0));
+    private final Pose finishPickup3 = new Pose(129, 98, Math.toRadians(0));
+    private final Pose ending = new Pose(85,115,29);
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
@@ -298,4 +298,3 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         shooter.setMotorDisable();
     }
 }
-

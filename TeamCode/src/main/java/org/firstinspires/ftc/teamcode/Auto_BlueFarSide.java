@@ -30,10 +30,10 @@ public class Auto_BlueFarSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(21, 124, Math.toRadians(144));
-    private final Pose launchPose1 = new Pose(42, 99.5, Math.toRadians(133));
-    private final Pose launchPose2 = new Pose(45.5, 95.5, Math.toRadians(135));
-    private final Pose launchPose3 = new Pose(50,90,Math.toRadians(137));
-    private final Pose launchPose4 = new Pose(51,91,Math.toRadians(139));
+    private final Pose launchPose1 = new Pose(42, 99.5, Math.toRadians(136));
+    private final Pose launchPose2 = new Pose(45.5, 95.5, Math.toRadians(136));
+    private final Pose launchPose3 = new Pose(50,90,Math.toRadians(138));
+    private final Pose launchPose4 = new Pose(65,95,Math.toRadians(151));
     private final Pose pickup1 = new Pose(51, 89, Math.toRadians(180));
     private final Pose pickup2 = new Pose(50, 62.5, Math.toRadians(181));
     private final Pose pickup3 = new Pose(50, 38, Math.toRadians(181));
@@ -43,7 +43,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
     private final Pose control = new Pose(64,69);
     private final Pose control1 = new Pose(47,60);
     private final Pose control2 = new Pose(64,45);
-    private final Pose ending = new Pose(60,138,0);
+    private final Pose ending = new Pose(65,95,151);
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3,endPath;
@@ -119,7 +119,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    endIntake();
+                    //endIntake();
                     follower.followPath(scorePickup1);
                     setPathState(4);
                 }
@@ -140,7 +140,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    endIntake();
+                    //endIntake();
                     follower.followPath(scorePickup2);
                     setPathState(7);
                 }
@@ -161,7 +161,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
                 break;
             case 9:
                 if (!follower.isBusy()) {
-                    endIntake();
+                    //endIntake();
                     follower.followPath(scorePickup3);
                     setPathState(10);
                 }
@@ -257,7 +257,7 @@ public class Auto_BlueFarSide extends LinearOpMode {
     }
 
     public void startIntake(){
-        intake.setPower(0.5);
+        intake.setPower(0.3);
         ramp.setPower(0.6);
     }
 
