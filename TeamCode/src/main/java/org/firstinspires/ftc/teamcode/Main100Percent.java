@@ -134,6 +134,7 @@ public class Main100Percent extends LinearOpMode {
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
         blocker.setDirection(Servo.Direction.REVERSE);
+        rightArm.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -324,13 +325,13 @@ public class Main100Percent extends LinearOpMode {
             shooter.setVelocity(0);
         }
         if(gamepad2.a){
-            leftArm.setPosition(.33);
+            leftArm.setPosition(.3);
         }
         else{
             leftArm.setPosition(0);
         }
         if(gamepad2.b){
-            rightArm.setPosition(.33);
+            rightArm.setPosition(.3);
         }
         else{
             rightArm.setPosition(0);
