@@ -234,7 +234,7 @@ public class Main100Percent extends LinearOpMode {
             telemetry.addData("Angle: ", angle);
             telemetry.addData("Botpose", botpose.toString());
             telemetry.addData("imu output: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-            //telemetry.update();
+            telemetry.update();
         }
     }
 
@@ -344,10 +344,10 @@ public class Main100Percent extends LinearOpMode {
             velocity=1350+adjustment;
         }
         else if(distance<=120){
-            velocity=1400+adjustment;
+            velocity=1450+adjustment;
         }
         else{
-            velocity=1450+adjustment;
+            velocity=1500+adjustment;
         }
     }
 
@@ -356,12 +356,12 @@ public class Main100Percent extends LinearOpMode {
         if (target != null) {
             distance=target.distance;
             if(target.bearing<-5){
-                leftLight.setPosition(.3);
+                leftLight.setPosition(.278);
             }
             else if(target.bearing>5){
                 leftLight.setPosition(.611);
             }
-            else if(Math.abs(target.bearing)<15 && Math.abs(target.bearing)>1){
+            else if(Math.abs(target.bearing)<10 && Math.abs(target.bearing)>1){
                 leftLight.setPosition(0.388);
             }
             else{
@@ -418,23 +418,33 @@ public class Main100Percent extends LinearOpMode {
 
     public void autoAlign() {
         if (gamepad1.a && !aPressed && llResult.isValid()) {
-            if(Math.abs(getTargetInfo().bearing)>2) {
+            LimelightTesting.TargetInfo info = getTargetInfo();
+            if(info != null && Math.abs(info.bearing)>2) {
                 // on first pressing x
                 aPressed = true;
-                while (getTargetInfo().bearing < -5 && opModeIsActive()) {
+                while (info != null && info.bearing < -10 && opModeIsActive()) {
                     turnLeft(.4);
+                    info = getTargetInfo();
                 }
-                while (getTargetInfo().bearing < -10 && opModeIsActive()) {
-                    turnLeft(.7);
+
+                info = getTargetInfo();
+                while (info != null && info.bearing < -2 && opModeIsActive()) {
+                    turnLeft(.25);
+                    info = getTargetInfo();
                 }
-                while (getTargetInfo().bearing > 5 && opModeIsActive()) {
+
+                info = getTargetInfo();
+                while (info != null && info.bearing > 10 && opModeIsActive()) {
                     turnRight(.4);
+                    info = getTargetInfo();
                 }
-                while (getTargetInfo().bearing > 10 && opModeIsActive()) {
-                    turnRight(.7);
+
+                info = getTargetInfo();
+                while (info != null && info.bearing > 2 && opModeIsActive()) {
+                    turnRight(.25);
+                    info = getTargetInfo();
                 }
             }
-
         } else if (aPressed && !gamepad1.a) {
             // x was pressed, but not pressed any longer
             aPressed = false;
@@ -446,33 +456,6 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setPower(-rot);
         leftBack.setPower(rot);
         rightBack.setPower(-rot);
-
-        /*leftFront.setVelocity(1500);
-        rightFront.setVelocity(1500);
-        leftBack.setVelocity(1500);
-        rightBack.setVelocity(1500);
-
-        int leftFrontTargetPos = leftFront.getCurrentPosition() + rot;
-        int rightFrontTargetPos = rightFront.getCurrentPosition() + rot;
-        int leftBackTargetPos = leftBack.getCurrentPosition() + rot;
-        int rightBackTargetPos = rightBack.getCurrentPosition() + rot;
-
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        leftFront.setTargetPosition(leftFrontTargetPos);
-        rightFront.setTargetPosition(rightFrontTargetPos);
-        leftBack.setTargetPosition(leftBackTargetPos);
-        rightBack.setTargetPosition(rightBackTargetPos);
-
-        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
-
-        telemetry.update();
     }
 
     public void turnLeft(double rot){
@@ -480,32 +463,6 @@ public class Main100Percent extends LinearOpMode {
         rightFront.setPower(rot);
         leftBack.setPower(-rot);
         rightBack.setPower(rot);
-
-        /*leftFront.setVelocity(1500);
-        rightFront.setVelocity(1500);
-        leftBack.setVelocity(1500);
-        rightBack.setVelocity(1500);
-        int leftFrontTargetPos = leftFront.getCurrentPosition() - rot;
-        int rightFrontTargetPos = rightFront.getCurrentPosition() - rot;
-        int leftBackTargetPos = leftBack.getCurrentPosition() - rot;
-        int rightBackTargetPos = rightBack.getCurrentPosition() - rot;
-
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        leftFront.setTargetPosition(leftFrontTargetPos);
-        rightFront.setTargetPosition(rightFrontTargetPos);
-        leftBack.setTargetPosition(leftBackTargetPos);
-        rightBack.setTargetPosition(rightBackTargetPos);
-
-        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
-
-        telemetry.update();
     }
 
 }
