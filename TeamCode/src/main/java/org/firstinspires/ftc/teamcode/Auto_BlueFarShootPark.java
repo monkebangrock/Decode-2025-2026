@@ -122,7 +122,7 @@ public class Auto_BlueFarShootPark extends LinearOpMode {
         double current = getRuntime();
         while ((getRuntime() < current + 2) && opModeIsActive()) {
             if (getRuntime() >= current + 0.8) {
-                tapper.setPosition(0.33);
+                tapper.setPosition(0.29);
             }
             telemetry.addData("time:", (getRuntime() - current));
             telemetry.update();

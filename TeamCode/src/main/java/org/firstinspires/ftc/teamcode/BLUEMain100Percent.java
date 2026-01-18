@@ -156,7 +156,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
         leftArm.setPosition(0.0);
@@ -270,7 +270,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             rampMoving1 = true;
         } else if (!gamepad2.left_bumper && rightBumperPressed) {
             rightBumperPressed = false;
-            blocker.setPosition(0.33);
+            blocker.setPosition(0.29);
             ramp.setPower(0);
             ramp.setMotorEnable();
             rampMoving1 = false;

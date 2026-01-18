@@ -214,7 +214,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
 
         waitForStart();
         opmodeTimer.resetTimer();
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         shooter.setVelocity(1470);
         setPathState(0);
         while (opModeIsActive()) {
@@ -232,7 +232,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
 
     public void shoot() {
         shooter.setMotorEnable();
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         while((shooter.getVelocity() <= 1470)&&opModeIsActive()){
             telemetry.addData("velocity",shooter.getVelocity());
             shooter.setVelocity(1470);
@@ -247,7 +247,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
             telemetry.update();
         }
         //shooter.setVelocity(0);
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         //shooter.setPower(0);
         telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
@@ -258,7 +258,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
 
     public void shoot1() {
         shooter.setMotorEnable();
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         while((shooter.getVelocity() >= 1260)&&opModeIsActive()){
             telemetry.addData("velocity",shooter.getVelocity());
             shooter.setVelocity(1260);
@@ -273,7 +273,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
             telemetry.update();
         }
         //shooter.setVelocity(0);
-        blocker.setPosition(0.33);
+        blocker.setPosition(0.29);
         //shooter.setPower(0);
         telemetry.addData("velocity",shooter.getVelocity());
         // pusher.setPower(0);
