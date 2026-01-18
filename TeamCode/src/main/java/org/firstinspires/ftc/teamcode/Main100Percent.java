@@ -42,6 +42,9 @@ public class Main100Percent extends LinearOpMode {
     private Servo blocker=null;
     private Servo rightLight=null;
     private Servo leftLight=null;
+    private Servo leftArm=null;
+    private Servo rightArm=null;
+
 
     boolean shooterActive=false;
     boolean dpadDownPressed = false;
@@ -88,6 +91,8 @@ public class Main100Percent extends LinearOpMode {
         blocker = hardwareMap.get(Servo.class, "blocker");
         rightLight = hardwareMap.get(Servo.class, "rightLight");
         leftLight = hardwareMap.get(Servo.class, "leftLight");
+        leftArm = hardwareMap.get(Servo.class, "leftArm");
+        rightArm = hardwareMap.get(Servo.class, "rightArm");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
@@ -129,6 +134,7 @@ public class Main100Percent extends LinearOpMode {
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
         blocker.setDirection(Servo.Direction.REVERSE);
+        rightArm.setDirection(Servo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -159,6 +165,9 @@ public class Main100Percent extends LinearOpMode {
         blocker.setPosition(0.33);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
+        leftArm.setPosition(0.0);
+        rightArm.setPosition(0.0);
+
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -314,6 +323,18 @@ public class Main100Percent extends LinearOpMode {
         }
         else{
             shooter.setVelocity(0);
+        }
+        if(gamepad2.a){
+            leftArm.setPosition(.3);
+        }
+        else{
+            leftArm.setPosition(0);
+        }
+        if(gamepad2.b){
+            rightArm.setPosition(.3);
+        }
+        else{
+            rightArm.setPosition(0);
         }
     }
 
