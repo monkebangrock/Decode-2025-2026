@@ -30,17 +30,17 @@ public class Auto_RedCloseSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(88, 8, Math.toRadians(90));
-    private final Pose launchPose1 = new Pose(86, 10, Math.toRadians(71));
-    private final Pose launchPose2 = new Pose(85.5, 26.5, Math.toRadians(62));
-    private final Pose launchPose3 = new Pose(85, 29, Math.toRadians(60));
-    private final Pose launchPose4 = new Pose(85, 115, Math.toRadians(29));
+    private final Pose launchPose1 = new Pose(86, 10, Math.toRadians(64));
+    private final Pose launchPose2 = new Pose(84.5, 24.5, Math.toRadians(62));
+    private final Pose launchPose3 = new Pose(84, 27, Math.toRadians(60));
+    private final Pose launchPose4 = new Pose(84, 115, Math.toRadians(27));
     private final Pose pickup1 = new Pose(103, 47, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(108,75 , Math.toRadians(0));
-    private final Pose pickup3 = new Pose(108, 98, Math.toRadians(0));
-    private final Pose finishPickup1 = new Pose(132, 47, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(132, 75, Math.toRadians(0));
-    private final Pose finishPickup3 = new Pose(129, 98, Math.toRadians(0));
-    private final Pose ending = new Pose(85,115,29);
+    private final Pose pickup2 = new Pose(108,72 , Math.toRadians(0));
+    private final Pose pickup3 = new Pose(108, 95, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(133, 47, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(133, 72, Math.toRadians(0));
+    private final Pose finishPickup3 = new Pose(130, 95, Math.toRadians(0));
+    private final Pose ending = new Pose(110,25,Math.toRadians(90));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
@@ -124,8 +124,8 @@ public class Auto_RedCloseSide extends LinearOpMode {
             case 4:
                 if (!follower.isBusy()) {
                     shoot();
-                    follower.followPath(beforePickup2);
-                    setPathState(5);
+                    follower.followPath(endPath); //changed to only pick up
+                    setPathState(-1); //changed to -1, org 5
                 }
                 break;
             case 5:
@@ -159,8 +159,6 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 break;
             case 9:
                 if (!follower.isBusy()) {
-                    //\
-                    // '/.
                     // endIntake();
                     follower.followPath(scorePickup3);
                     setPathState(10);

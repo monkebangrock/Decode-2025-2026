@@ -344,7 +344,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             rightLight.setPosition(1);
         }
         if(distance>=1.5){
-            velocity= 90*distance+1350;
+            velocity= 90*distance+1330;
         }
         else{
             velocity = 200*distance+1070;

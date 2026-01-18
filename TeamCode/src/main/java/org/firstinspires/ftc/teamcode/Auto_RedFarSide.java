@@ -30,20 +30,20 @@ public class Auto_RedFarSide extends LinearOpMode {
     int velocity = 1000;
 
     private final Pose startPose = new Pose(123, 124, Math.toRadians(36));
-    private final Pose launchPose1 = new Pose(94, 88, Math.toRadians(46));
-    private final Pose launchPose2 = new Pose(91, 85, Math.toRadians(41));
-    private final Pose launchPose3 = new Pose(90,86,Math.toRadians(41));
+    private final Pose launchPose1 = new Pose(93, 90, Math.toRadians(50));
+    private final Pose launchPose2 = new Pose(91, 86, Math.toRadians(42));
+    private final Pose launchPose3 = new Pose(90,87,Math.toRadians(42));
     private final Pose launchPose4 = new Pose(79,95,Math.toRadians(29));
-    private final Pose pickup1 = new Pose(93, 86, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(94, 65, Math.toRadians(1));
-    private final Pose pickup3 = new Pose(94, 42, Math.toRadians(1));
-    private final Pose finishPickup1 = new Pose(128, 86, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(132, 65, Math.toRadians(0));
-    private final Pose finishPickup3 = new Pose(131, 42, Math.toRadians(0));
+    private final Pose pickup1 = new Pose(93, 88, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(94, 67, Math.toRadians(1));
+    private final Pose pickup3 = new Pose(94, 40, Math.toRadians(1));
+    private final Pose finishPickup1 = new Pose(128, 88, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(132, 67, Math.toRadians(0));
+    private final Pose finishPickup3 = new Pose(131, 40, Math.toRadians(0));
     private final Pose control = new Pose(80,69);
     private final Pose control1 = new Pose(97,60);
     private final Pose control2 = new Pose(80,45);
-    private final Pose ending = new Pose(79,95,Math.toRadians(29));
+    private final Pose ending = new Pose(79,100,Math.toRadians(29));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3,endPath;
