@@ -271,7 +271,7 @@ public class Main100Percent extends LinearOpMode {
             intake.setMotorEnable();
             intake.setPower(0.5);
             ramp.setMotorEnable();
-            ramp.setPower(1);
+            ramp.setPower(.7);
             blocker.setPosition(0);
             rampMoving1 = true;
         } else if (!gamepad2.left_bumper && rightBumperPressed) {
@@ -350,10 +350,10 @@ public class Main100Percent extends LinearOpMode {
             rightLight.setPosition(1);
         }
         if(distance>=1.5){
-            velocity=229*distance+1075;
+            velocity= 90*distance+1350;
         }
         else{
-            velocity = 135.5*distance+1252;
+            velocity = 200*distance+1070;
         }
     }
 
