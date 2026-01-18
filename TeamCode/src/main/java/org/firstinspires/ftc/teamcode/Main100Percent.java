@@ -52,7 +52,7 @@ public class Main100Percent extends LinearOpMode {
     boolean rampMoving2 = false;
 
     int rampTargetPosition = 0;
-    int velocity = 1300;
+    double velocity = 1300;
     int drivingSpeed=5000;
     int adjustment=0;
 
@@ -328,26 +328,11 @@ public class Main100Percent extends LinearOpMode {
         else{
             rightLight.setPosition(1);
         }
-        if(distance<=50){
-            velocity=1300+adjustment;
-        }
-        else if(distance<=60){
-            velocity=1250+adjustment;
-        }
-        else if(distance<=72){
-            velocity=1200+adjustment;
-        }
-        else if(distance<=85){
-            velocity=1275+adjustment;
-        }
-        else if(distance<=100){
-            velocity=1350+adjustment;
-        }
-        else if(distance<=120){
-            velocity=1450+adjustment;
+        if(distance>=1.5){
+            velocity=229*distance+1075;
         }
         else{
-            velocity=1500+adjustment;
+            velocity = 135.5*distance+1252;
         }
     }
 
