@@ -446,8 +446,24 @@ public class BLUEMain100Percent extends LinearOpMode {
 
     public void autoAlign(){
         double err=0.0;
-        if (gamepad1.a && !aPressed && llResult.isValid()) {
+        if (gamepad1.a && !aPressed) {
             LimelightTesting.TargetInfo info = getTargetInfo();
+            while(info==null && opModeIsActive()){
+                if(Math.toRadians(otos.getPosition().h)>-Math.PI/4 && Math.toRadians(otos.getPosition().h)<=((Math.PI*3)/4)){
+                    info = getTargetInfo();
+                    turnRight(0.7);
+                    if(llResult.isValid()){
+                        break;
+                    }
+                }
+                else if(Math.toRadians(otos.getPosition().h)<-Math.PI/4-.1 || Math.toRadians(otos.getPosition().h)>=(Math.PI*3)/4-.1){
+                    info = getTargetInfo();
+                    turnLeft(0.7);
+                    if(llResult.isValid()){
+                        break;
+                    }
+                }
+            }
             if (info !=null) {
                 err = Math.abs(info.bearing);
                 while (err > 0.02 && opModeIsActive()) {
