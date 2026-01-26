@@ -7,27 +7,49 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.List;
 
 @Autonomous
 public class Auto_BlueCloseSide extends LinearOpMode {
 
+    private ElapsedTime runtime = new ElapsedTime();
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private DcMotorEx ramp;
     private DcMotorEx intake;
     private DcMotorEx shooter;
+    private DcMotorEx leftFront;
+    private DcMotorEx leftBack;
+    private DcMotorEx rightFront;
+    private DcMotorEx rightBack;
     private int pathState;
     private Servo blocker;
-    int velocity = 1000;
+    SparkFunOTOS otos;
+    Limelight3A limelight;
+    double POI_Behind = 0.2;
+    double POI_Up = 0.25;
+    double integralSum=0;
+    double Kp=0.04; //0.05
+    double Ki=0.0; //0.005
+    double Kd=0.0; //0.005
+    private double lastError=0;
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
     private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(109));
@@ -200,6 +222,12 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         blocker = hardwareMap.get(Servo.class, "blocker");
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
+        otos = hardwareMap.get(SparkFunOTOS.class, "otos");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -210,7 +238,20 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setDirection(Servo.Direction.REVERSE);
 
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotor.Direction.FORWARD);
+
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
+        limelight.pipelineSwitch(0);
+        limelight.start();
+
 
         waitForStart();
         opmodeTimer.resetTimer();
@@ -296,6 +337,93 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         shooter.setVelocity(0);
         shooter.setPower(0);
         shooter.setMotorDisable();
+    }
+
+    public LimelightTesting.TargetInfo getTargetInfo() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) {
+            return null;
+        }
+        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        if (fiducials.isEmpty()) {
+            return null;
+        }
+        LLResultTypes.FiducialResult tag = fiducials.get(0);
+        Pose3D robotInTarget = tag.getRobotPoseTargetSpace();
+        if (robotInTarget == null) {
+            return null;
+        }
+
+        // Robot position in tag space
+        double robotX = robotInTarget.getPosition().x;
+        double robotY = robotInTarget.getPosition().y;
+        double robotZ = robotInTarget.getPosition().z;
+
+        // Robot heading (pitch is turn axis in this coordinate system)
+        double robotHeading = robotInTarget.getOrientation().getPitch();
+
+        // Vector from robot to POI (in tag space)
+        double toPoiX = 0 - robotX;
+        double toPoiY = POI_Up - robotY;
+        double toPoiZ = POI_Behind - robotZ;
+
+        // Direction to POI, minus robot heading = relative bearing
+        double bearing = Math.toDegrees(Math.atan2(toPoiX, toPoiZ)) - robotHeading;
+
+        // Normalize to -180 to 180
+        while (bearing > 180) bearing -= 360;
+        while (bearing < -180) bearing += 360;
+
+        // 3D distance
+        double distance = Math.sqrt(toPoiX * toPoiX + toPoiY * toPoiY + toPoiZ * toPoiZ);
+
+        return new LimelightTesting.TargetInfo(bearing, distance);
+    }
+
+    public double PIDControl(double ref, double state){
+        double error = ref-state;
+        integralSum+= error * runtime.seconds();
+        double derivative = (error-lastError)/runtime.seconds();
+        lastError=error;
+        runtime.reset();
+        double output = (error*Kp)+(derivative*Kd)+(integralSum*Ki);
+        return output;
+    }
+
+    public void autoAlign(){
+        double err=0.0;
+        LimelightTesting.TargetInfo info = getTargetInfo();
+        if (info !=null) {
+            err = Math.abs(info.bearing);
+            while (err > 0.02 && opModeIsActive()) {
+                if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
+                    break;
+                }
+                double power = PIDControl(0.0, info.bearing);
+                // max power
+                if (power > 0.5)
+                    power =0.5;
+                if (power < -0.5)
+                    power = -0.5;
+                // min power
+                if (power >0 && power < 0.05 )
+                    power = 0.05;
+                if (power <0 && power > -0.05 )
+                    power = -0.05;
+
+                leftFront.setPower(-power);
+                rightFront.setPower(power);
+                leftBack.setPower(-power);
+                rightBack.setPower(power);
+                do {
+                    info = getTargetInfo();
+                    if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
+                        break;
+                    }
+                } while (info==null);
+                err = Math.abs(info.bearing);
+            }
+        }
     }
 }
 

@@ -59,12 +59,9 @@ public class BLUEMain100Percent extends LinearOpMode {
     int kickUP = 700;
     int kickDown = 0;
 
-    double servoPosition = 0.0;
     double distance;
     double angleToGoalDegrees;
     double angleToGoalRadians;
-    double limelightLensHeightInches = 16.75;
-    double goalHeightInches = 29.5;
     double POI_Behind = 0.2;
     double POI_Up = 0.25;
     double integralSum=0;
@@ -118,9 +115,6 @@ public class BLUEMain100Percent extends LinearOpMode {
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         kickStand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
-
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
         // ########################################################################################
