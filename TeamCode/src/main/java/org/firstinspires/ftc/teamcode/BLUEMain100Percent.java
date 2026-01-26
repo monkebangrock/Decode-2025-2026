@@ -33,6 +33,7 @@ public class BLUEMain100Percent extends LinearOpMode {
     private DcMotorEx intake = null;
     private DcMotorEx shooter = null;
     private DcMotorEx ramp = null;
+    private DcMotorEx kickStand = null;
     private Servo blocker=null;
     private Servo rightLight=null;
     private Servo leftLight=null;
@@ -46,6 +47,8 @@ public class BLUEMain100Percent extends LinearOpMode {
     boolean dpadUpPressed = false;
     boolean rightBumperPressed = false;
     boolean aPressed = false;
+    boolean bPressed = false;
+    boolean kickStandUp = false;
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
 
@@ -53,6 +56,8 @@ public class BLUEMain100Percent extends LinearOpMode {
     double velocity = 1300;
     int drivingSpeed=5000;
     int adjustment=0;
+    int kickUP = 700;
+    int kickDown = 0;
 
     double servoPosition = 0.0;
     double distance;
@@ -85,6 +90,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
+        kickStand = hardwareMap.get(DcMotorEx.class, "kickStand");
         blocker = hardwareMap.get(Servo.class, "blocker");
         rightLight = hardwareMap.get(Servo.class, "rightLight");
         leftLight = hardwareMap.get(Servo.class, "leftLight");
@@ -101,6 +107,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         ramp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        kickStand.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //brake motors
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -110,6 +117,9 @@ public class BLUEMain100Percent extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        kickStand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
 
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
@@ -128,6 +138,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
+        kickStand.setDirection(DcMotor.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
         blocker.setDirection(Servo.Direction.REVERSE);
         rightArm.setDirection(Servo.Direction.REVERSE);
@@ -159,6 +170,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        kickStand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setPosition(0.29);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
@@ -228,6 +240,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             setSpeed();
             align();
             autoAlign();
+            fullPark();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
@@ -472,6 +485,29 @@ public class BLUEMain100Percent extends LinearOpMode {
         } else if (aPressed && !gamepad1.a) {
             // x was pressed, but not pressed any longer
             aPressed = false;
+        }
+    }
+
+    public void fullPark(){
+        if(gamepad1.b && !bPressed){
+            kickStand.setMotorEnable();
+            bPressed = true;
+            if(!kickStandUp) {
+                kickStand.setTargetPosition(kickUP);
+                kickStandUp = true;
+            }
+            else {
+                kickStand.setTargetPosition(kickDown);
+                kickStandUp = false;
+            }
+            kickStand.setPower(.6);
+            while(Math.abs(kickStand.getTargetPosition()-kickStand.getCurrentPosition())>10){
+                kickStand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+        }
+        else if(!gamepad1.b && bPressed){
+            bPressed = false;
+            kickStand.setMotorDisable();
         }
     }
 
