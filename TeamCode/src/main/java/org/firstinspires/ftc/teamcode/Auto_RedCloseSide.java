@@ -34,10 +34,10 @@ public class Auto_RedCloseSide extends LinearOpMode {
     private final Pose launchPose2 = new Pose(84.5, 24.5, Math.toRadians(62));
     private final Pose launchPose3 = new Pose(84, 27, Math.toRadians(60));
     private final Pose launchPose4 = new Pose(84, 115, Math.toRadians(27));
-    private final Pose pickup1 = new Pose(103, 47, Math.toRadians(0));
+    private final Pose pickup1 = new Pose(103, 45.5, Math.toRadians(0));
     private final Pose pickup2 = new Pose(108,72 , Math.toRadians(0));
     private final Pose pickup3 = new Pose(108, 95, Math.toRadians(0));
-    private final Pose finishPickup1 = new Pose(133, 47, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(136, 45.5, Math.toRadians(0));
     private final Pose finishPickup2 = new Pose(133, 72, Math.toRadians(0));
     private final Pose finishPickup3 = new Pose(130, 95, Math.toRadians(0));
     private final Pose ending = new Pose(110,25,Math.toRadians(90));

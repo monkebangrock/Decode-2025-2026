@@ -7,6 +7,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -31,13 +32,13 @@ public class BLUEMain100Percent extends LinearOpMode {
     private DcMotorEx rightBack = null;
     private DcMotorEx intake = null;
     private DcMotorEx shooter = null;
-    private DcMotorEx leftShooter = null;
     private DcMotorEx ramp = null;
     private Servo blocker=null;
     private Servo rightLight=null;
     private Servo leftLight=null;
     private Servo leftArm=null;
     private Servo rightArm=null;
+    private CRServo rightIntakeServo=null;
 
 
     boolean shooterActive=false;
@@ -53,8 +54,6 @@ public class BLUEMain100Percent extends LinearOpMode {
     int drivingSpeed=5000;
     int adjustment=0;
 
-    long timer = 0;
-
     double servoPosition = 0.0;
     double distance;
     double angleToGoalDegrees;
@@ -63,6 +62,11 @@ public class BLUEMain100Percent extends LinearOpMode {
     double goalHeightInches = 29.5;
     double POI_Behind = 0.2;
     double POI_Up = 0.25;
+    double integralSum=0;
+    double Kp=0.04; //0.05
+    double Ki=0.0; //0.005
+    double Kd=0.0; //0.005
+    private double lastError=0;
 
     Pose3D botpose;
     LLResult llResult;
@@ -80,13 +84,13 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
-        leftShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         blocker = hardwareMap.get(Servo.class, "blocker");
         rightLight = hardwareMap.get(Servo.class, "rightLight");
         leftLight = hardwareMap.get(Servo.class, "leftLight");
         leftArm = hardwareMap.get(Servo.class, "leftArm");
         rightArm = hardwareMap.get(Servo.class, "rightArm");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
@@ -96,7 +100,6 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        leftShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ramp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //brake motors
@@ -106,7 +109,6 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
@@ -129,6 +131,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         shooter.setDirection(DcMotor.Direction.REVERSE);
         blocker.setDirection(Servo.Direction.REVERSE);
         rightArm.setDirection(Servo.Direction.REVERSE);
+        rightIntakeServo.setDirection(CRServo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -161,7 +164,6 @@ public class BLUEMain100Percent extends LinearOpMode {
         leftLight.setPosition(1);
         leftArm.setPosition(0.0);
         rightArm.setPosition(0.0);
-
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -248,6 +250,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             ramp.setMotorEnable();
             intake.setPower(.5);
             ramp.setPower(.6);
+            rightIntakeServo.setPower(1);
         }
         else{
             // turn off intake
@@ -255,6 +258,7 @@ public class BLUEMain100Percent extends LinearOpMode {
                 // turn off the ramp (if its not being told to run for other reason)
                 ramp.setMotorDisable();
                 intake.setMotorDisable();
+                rightIntakeServo.setPower(0);
             }
         }
     }
@@ -356,7 +360,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         if (target != null) {
             distance=target.distance;
             if(target.bearing<-5){
-                leftLight.setPosition(.278);
+                leftLight.setPosition(.32);
             }
             else if(target.bearing>5){
                 leftLight.setPosition(.611);
@@ -369,6 +373,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             }
             telemetry.addData("Bearing", "%.2f°", target.bearing);
             telemetry.addData("Distance", "%.3f m", target.distance);
+            telemetry.update();
         } else {
             leftLight.setPosition(1);
             telemetry.addLine("No target");
@@ -416,33 +421,52 @@ public class BLUEMain100Percent extends LinearOpMode {
         return new LimelightTesting.TargetInfo(bearing, distance);
     }
 
-    public void autoAlign() {
+    public double PIDControl(double ref, double state){
+        double error = ref-state;
+        integralSum+= error * runtime.seconds();
+        double derivative = (error-lastError)/runtime.seconds();
+        lastError=error;
+        runtime.reset();
+        double output = (error*Kp)+(derivative*Kd)+(integralSum*Ki);
+        return output;
+    }
+
+    public void autoAlign(){
+        double err=0.0;
         if (gamepad1.a && !aPressed && llResult.isValid()) {
             LimelightTesting.TargetInfo info = getTargetInfo();
-            if(info != null && Math.abs(info.bearing)>2) {
-                // on first pressing x
-                aPressed = true;
-                while (info != null && info.bearing < -10 && opModeIsActive()) {
-                    turnLeft(.4);
-                    info = getTargetInfo();
-                }
+            if (info !=null) {
+                err = Math.abs(info.bearing);
+                while (err > 0.02 && opModeIsActive()) {
+                    if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
+                        break;
+                    }
+                    align();
+                    double power = PIDControl(0.0, info.bearing);
 
-                info = getTargetInfo();
-                while (info != null && info.bearing < -2 && opModeIsActive()) {
-                    turnLeft(.25);
-                    info = getTargetInfo();
-                }
+                    // max power
+                    if (power > 0.5)
+                        power =0.5;
+                    if (power < -0.5)
+                        power = -0.5;
 
-                info = getTargetInfo();
-                while (info != null && info.bearing > 10 && opModeIsActive()) {
-                    turnRight(.4);
-                    info = getTargetInfo();
-                }
+                    // min power
+                    if (power >0 && power < 0.05 )
+                        power = 0.05;
+                    if (power <0 && power > -0.05 )
+                        power = -0.05;
 
-                info = getTargetInfo();
-                while (info != null && info.bearing > 2 && opModeIsActive()) {
-                    turnRight(.25);
-                    info = getTargetInfo();
+                    leftFront.setPower(-power);
+                    rightFront.setPower(power);
+                    leftBack.setPower(-power);
+                    rightBack.setPower(power);
+                    do {
+                        info = getTargetInfo();
+                        if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
+                            break;
+                        }
+                    } while (info==null);
+                    err = Math.abs(info.bearing);
                 }
             }
         } else if (aPressed && !gamepad1.a) {
