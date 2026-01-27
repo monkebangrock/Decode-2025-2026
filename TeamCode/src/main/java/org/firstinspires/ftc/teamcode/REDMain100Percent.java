@@ -5,6 +5,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -15,15 +16,12 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
 @TeleOp
-//@Disabled
 public class REDMain100Percent extends LinearOpMode {
-    //test Abby 3
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx leftFront = null;
@@ -33,11 +31,14 @@ public class REDMain100Percent extends LinearOpMode {
     private DcMotorEx intake = null;
     private DcMotorEx shooter = null;
     private DcMotorEx ramp = null;
+    private DcMotorEx kickStand = null;
     private Servo blocker=null;
     private Servo rightLight=null;
     private Servo leftLight=null;
     private Servo leftArm=null;
     private Servo rightArm=null;
+    private CRServo rightIntakeServo=null;
+    private CRServo leftIntakeServo=null;
 
 
     boolean shooterActive=false;
@@ -45,6 +46,8 @@ public class REDMain100Percent extends LinearOpMode {
     boolean dpadUpPressed = false;
     boolean rightBumperPressed = false;
     boolean aPressed = false;
+    boolean bPressed = false;
+    boolean kickStandUp = false;
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
 
@@ -52,15 +55,12 @@ public class REDMain100Percent extends LinearOpMode {
     double velocity = 1300;
     int drivingSpeed=5000;
     int adjustment=0;
+    int kickUP = 700;
+    int kickDown = 0;
 
-    long timer = 0;
-
-    double servoPosition = 0.0;
     double distance;
     double angleToGoalDegrees;
     double angleToGoalRadians;
-    double limelightLensHeightInches = 16.75;
-    double goalHeightInches = 29.5;
     double POI_Behind = 0.2;
     double POI_Up = 0.25;
     double integralSum=0;
@@ -86,11 +86,14 @@ public class REDMain100Percent extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         ramp = hardwareMap.get(DcMotorEx.class, "ramp");
+        kickStand = hardwareMap.get(DcMotorEx.class, "kickStand");
         blocker = hardwareMap.get(Servo.class, "blocker");
         rightLight = hardwareMap.get(Servo.class, "rightLight");
         leftLight = hardwareMap.get(Servo.class, "leftLight");
         leftArm = hardwareMap.get(Servo.class, "leftArm");
         rightArm = hardwareMap.get(Servo.class, "rightArm");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "leftIntakeServo");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
@@ -101,6 +104,7 @@ public class REDMain100Percent extends LinearOpMode {
         rightBack.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         ramp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        kickStand.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //brake motors
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -110,7 +114,7 @@ public class REDMain100Percent extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ramp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        kickStand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setVelocityPIDFCoefficients(100, 2, 60, 0);
 
         // ########################################################################################
@@ -128,9 +132,11 @@ public class REDMain100Percent extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         ramp.setDirection(DcMotorSimple.Direction.FORWARD);
+        kickStand.setDirection(DcMotor.Direction.FORWARD);
         shooter.setDirection(DcMotor.Direction.REVERSE);
         blocker.setDirection(Servo.Direction.REVERSE);
         rightArm.setDirection(Servo.Direction.REVERSE);
+        rightIntakeServo.setDirection(CRServo.Direction.REVERSE);
         otos.calibrateImu();
         otos.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
@@ -157,7 +163,7 @@ public class REDMain100Percent extends LinearOpMode {
         leftBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        kickStand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setPosition(0.29);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
@@ -228,6 +234,7 @@ public class REDMain100Percent extends LinearOpMode {
             setSpeed();
             align();
             autoAlign();
+            fullPark();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
@@ -250,6 +257,8 @@ public class REDMain100Percent extends LinearOpMode {
             ramp.setMotorEnable();
             intake.setPower(.5);
             ramp.setPower(.6);
+            rightIntakeServo.setPower(1);
+            leftIntakeServo.setPower(1);
         }
         else{
             // turn off intake
@@ -257,6 +266,8 @@ public class REDMain100Percent extends LinearOpMode {
                 // turn off the ramp (if its not being told to run for other reason)
                 ramp.setMotorDisable();
                 intake.setMotorDisable();
+                rightIntakeServo.setPower(0);
+                leftIntakeServo.setPower(0);
             }
         }
     }
@@ -486,6 +497,29 @@ public class REDMain100Percent extends LinearOpMode {
         } else if (aPressed && !gamepad1.a) {
             // x was pressed, but not pressed any longer
             aPressed = false;
+        }
+    }
+
+    public void fullPark(){
+        if(gamepad1.b && !bPressed){
+            kickStand.setMotorEnable();
+            bPressed = true;
+            if(!kickStandUp) {
+                kickStand.setTargetPosition(kickUP);
+                kickStandUp = true;
+            }
+            else {
+                kickStand.setTargetPosition(kickDown);
+                kickStandUp = false;
+            }
+            kickStand.setPower(.6);
+            while(Math.abs(kickStand.getTargetPosition()-kickStand.getCurrentPosition())>10){
+                kickStand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+        }
+        else if(!gamepad1.b && bPressed){
+            bPressed = false;
+            kickStand.setMotorDisable();
         }
     }
 

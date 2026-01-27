@@ -21,9 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import java.util.List;
 
 @TeleOp
-//@Disabled
 public class BLUEMain100Percent extends LinearOpMode {
-    //test Abby 3
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx leftFront = null;
@@ -40,6 +38,7 @@ public class BLUEMain100Percent extends LinearOpMode {
     private Servo leftArm=null;
     private Servo rightArm=null;
     private CRServo rightIntakeServo=null;
+    private CRServo leftIntakeServo=null;
 
 
     boolean shooterActive=false;
@@ -94,6 +93,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         leftArm = hardwareMap.get(Servo.class, "leftArm");
         rightArm = hardwareMap.get(Servo.class, "rightArm");
         rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "leftIntakeServo");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
@@ -163,7 +163,6 @@ public class BLUEMain100Percent extends LinearOpMode {
         leftBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        ramp.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         kickStand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setPosition(0.29);
         rightLight.setPosition(1);
@@ -258,6 +257,7 @@ public class BLUEMain100Percent extends LinearOpMode {
             intake.setPower(.5);
             ramp.setPower(.6);
             rightIntakeServo.setPower(1);
+            leftIntakeServo.setPower(1);
         }
         else{
             // turn off intake
@@ -266,6 +266,7 @@ public class BLUEMain100Percent extends LinearOpMode {
                 ramp.setMotorDisable();
                 intake.setMotorDisable();
                 rightIntakeServo.setPower(0);
+                leftIntakeServo.setPower(0);
             }
         }
     }
