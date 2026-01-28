@@ -163,6 +163,7 @@ public class REDMain100Percent extends LinearOpMode {
         leftBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         kickStand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setPosition(0.29);
         rightLight.setPosition(1);
