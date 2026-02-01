@@ -50,6 +50,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     double Ki=0.0; //0.005
     double Kd=0.0; //0.005
     private double lastError=0;
+    boolean aligned=false;
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
     private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(109));
@@ -124,6 +125,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
+                    autoAlign();
                     shoot();
                     follower.followPath(beforePickup1);
                     setPathState(2);
@@ -145,6 +147,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 break;
             case 4:
                 if (!follower.isBusy()) {
+                    autoAlign();
                     shoot();
                     follower.followPath(endPath); //changed to end path: original beforepickup2
                     setPathState(-1); //changed to -1, org 5
@@ -390,38 +393,47 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         return output;
     }
 
-    public void autoAlign(){
-        double err=0.0;
+    public void autoAlign() {
+        double err = 0.0;
         LimelightTesting.TargetInfo info = getTargetInfo();
-        if (info !=null) {
+        while (info == null && opModeIsActive()) {
+            info = getTargetInfo();
+            leftFront.setPower(.3);
+            rightFront.setPower(-.3);
+            leftBack.setPower(.3);
+            rightBack.setPower(-.3);
+        }
+        if (info != null) {
             err = Math.abs(info.bearing);
-            while (err > 0.02 && opModeIsActive()) {
-                if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
-                    break;
-                }
+            while (err > 1 && opModeIsActive()) {
+                err = Math.abs(info.bearing);
                 double power = PIDControl(0.0, info.bearing);
                 // max power
                 if (power > 0.5)
-                    power =0.5;
+                    power = 0.5;
                 if (power < -0.5)
                     power = -0.5;
                 // min power
-                if (power >0 && power < 0.05 )
-                    power = 0.05;
-                if (power <0 && power > -0.05 )
-                    power = -0.05;
+                if (power > 0 && power < 0.1)
+                    power = 0.1;
+                if (power < 0 && power > -0.1)
+                    power = -0.1;
 
                 leftFront.setPower(-power);
                 rightFront.setPower(power);
                 leftBack.setPower(-power);
                 rightBack.setPower(power);
+                telemetry.addData("power", power);
+                telemetry.addData("bearing", info.bearing);
+                telemetry.update();
+                // update info
                 do {
                     info = getTargetInfo();
-                    if (Math.abs(gamepad1.left_stick_y) > 0 || Math.abs(gamepad1.left_stick_x) > 0 || Math.abs(gamepad1.right_stick_x) > 0) {
-                        break;
+                    if (info==null) {
+                        telemetry.addData("stuck! null", null);
+                        telemetry.update();
                     }
                 } while (info==null);
-                err = Math.abs(info.bearing);
             }
         }
     }
