@@ -50,12 +50,14 @@ public class REDMain100Percent extends LinearOpMode {
     boolean kickStandUp = false;
     boolean rampMoving1 = false;
     boolean rampMoving2 = false;
+    boolean emergencyMode=false;
+    boolean guidePressed=false;
 
     int rampTargetPosition = 0;
     double velocity = 1300;
     int drivingSpeed=5000;
     int adjustment=0;
-    int kickUP = 700;
+    int kickUP = 1200;
     int kickDown = 0;
 
     double distance;
@@ -236,6 +238,7 @@ public class REDMain100Percent extends LinearOpMode {
             align();
             autoAlign();
             fullPark();
+            arms();
 
             telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
@@ -260,6 +263,8 @@ public class REDMain100Percent extends LinearOpMode {
             ramp.setPower(.6);
             rightIntakeServo.setPower(1);
             leftIntakeServo.setPower(1);
+            rightArm.setPosition(.3);
+            leftArm.setPosition(.3);
         }
         else{
             // turn off intake
@@ -274,6 +279,13 @@ public class REDMain100Percent extends LinearOpMode {
     }
 
     public void shooter(){
+        if(!guidePressed && gamepad2.guide){
+            emergencyMode=!emergencyMode;
+            rightLight.setPosition(.33);
+            guidePressed=true;
+        } else if(guidePressed&&!gamepad2.guide){
+            guidePressed=false;
+        }
         if (gamepad2.left_bumper && !rightBumperPressed) {
             rightBumperPressed = true;
             intake.setMotorEnable();
@@ -281,6 +293,8 @@ public class REDMain100Percent extends LinearOpMode {
             ramp.setMotorEnable();
             ramp.setPower(.7);
             blocker.setPosition(0);
+            rightArm.setPosition(0.3);
+            leftArm.setPosition(0.3);
             rampMoving1 = true;
         } else if (!gamepad2.left_bumper && rightBumperPressed) {
             rightBumperPressed = false;
@@ -325,43 +339,42 @@ public class REDMain100Percent extends LinearOpMode {
         else{
             dpadDownPressed=false;
         }
-
-        if(shooterActive){
-            shooter.setVelocity(velocity);
+        if(!emergencyMode) {
+            if (shooterActive) {
+                shooter.setVelocity(velocity);
+            } else {
+                shooter.setVelocity(1300);
+            }
         }
         else{
-            shooter.setVelocity(0);
-        }
-        if(gamepad2.a){
-            leftArm.setPosition(.3);
-        }
-        else{
-            leftArm.setPosition(0);
-        }
-        if(gamepad2.b){
-            rightArm.setPosition(.3);
-        }
-        else{
-            rightArm.setPosition(0);
+            if(shooterActive){
+                shooter.setPower(velocity/2520);
+            }
+            else{
+                shooter.setPower(1300/2520);
+            }
         }
     }
 
-    public void setSpeed(){
-        if (llResult !=null && llResult.isValid()){
-            angleToGoalDegrees = llResult.getTy();
-            angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-        }
-        if(Math.abs(shooter.getVelocity()-velocity)<40){
-            rightLight.setPosition(0.5);
+    public void setSpeed() {
+        if (!emergencyMode) {
+            if (llResult != null && llResult.isValid()) {
+                angleToGoalDegrees = llResult.getTy();
+                angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
+            }
+            if (Math.abs(shooter.getVelocity() - velocity) < 40) {
+                rightLight.setPosition(0.5);
+            } else {
+                rightLight.setPosition(1);
+            }
+            if (distance >= 1.7) {
+                velocity= 249*distance*distance+-509*distance+1497+adjustment;
+            } else {
+                velocity = 290*distance+834+adjustment;
+            }
         }
         else{
-            rightLight.setPosition(1);
-        }
-        if(distance>=1.5){
-            velocity= 90*distance+1330;
-        }
-        else{
-            velocity = 200*distance+1070;
+            velocity=adjustment+1300;
         }
     }
 
@@ -444,6 +457,8 @@ public class REDMain100Percent extends LinearOpMode {
     public void autoAlign(){
         double err=0.0;
         if (gamepad1.a && !aPressed) {
+            shooterActive=true;
+            shooter();
             LimelightTesting.TargetInfo info = getTargetInfo();
             while(info==null && opModeIsActive()){
                 if(Math.toRadians(otos.getPosition().h)>Math.PI/4 || Math.toRadians(otos.getPosition().h)<=(-(Math.PI*3)/4)){
@@ -521,6 +536,23 @@ public class REDMain100Percent extends LinearOpMode {
         else if(!gamepad1.b && bPressed){
             bPressed = false;
             kickStand.setMotorDisable();
+        }
+    }
+
+    public void arms(){
+        if(!gamepad2.left_bumper && !gamepad1.right_bumper){
+            if(gamepad2.a){
+                leftArm.setPosition(.3);
+            }
+            else{
+                leftArm.setPosition(0);
+            }
+            if(gamepad2.b){
+                rightArm.setPosition(.3);
+            }
+            else{
+                rightArm.setPosition(0);
+            }
         }
     }
 
