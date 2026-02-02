@@ -173,9 +173,10 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 if (!follower.isBusy()){
                     //autoAlign();
                     shoot();
-                    follower.followPath(endPath); //org beforepickup3
+                    follower.followPath(endPath);//org beforepickup3
                     setPathState(-1);
                     endIntake();
+                    stopShooter();
                 }
                 break;
             case 8:
