@@ -39,6 +39,8 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     private DcMotorEx leftBack;
     private DcMotorEx rightFront;
     private DcMotorEx rightBack;
+    private CRServo leftIntakeServo;
+    private CRServo rightIntakeServo;
     private int pathState;
     private Servo blocker;
     SparkFunOTOS otos;
@@ -53,17 +55,17 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     boolean aligned=false;
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(109));
-    private final Pose launchPose2 = new Pose(60.5, 18.5, Math.toRadians(118));
-    private final Pose launchPose3 = new Pose(61, 22, Math.toRadians(122));
+    private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(111));
+    private final Pose launchPose2 = new Pose(60, 14.5, Math.toRadians(117));
+    private final Pose launchPose3 = new Pose(58, 15, Math.toRadians(120));
     private final Pose launchPose4 = new Pose(65, 95, Math.toRadians(151));
-    private final Pose pickup1 = new Pose(56, 25.5, Math.toRadians(180));
-    private final Pose pickup2 = new Pose(56, 50, Math.toRadians(180));
+    private final Pose pickup1 = new Pose(56, 20, Math.toRadians(180));
+    private final Pose pickup2 = new Pose(56, 40, Math.toRadians(180));
     private final Pose pickup3 = new Pose(56, 79, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(29, 25.5, Math.toRadians(180));
-    private final Pose finishPickup2 = new Pose(30, 50, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(37, 20, Math.toRadians(180));
+    private final Pose finishPickup2 = new Pose(35, 40, Math.toRadians(180));
     private final Pose finishPickup3 = new Pose(33, 79, Math.toRadians(180));
-    private final Pose ending = new Pose(39,25,Math.toRadians(90));
+    private final Pose ending = new Pose(56,44,Math.toRadians(180));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
@@ -125,7 +127,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    autoAlign();
+                    //autoAlign();
                     shoot();
                     follower.followPath(beforePickup1);
                     setPathState(2);
@@ -140,17 +142,17 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup1);
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
-                    autoAlign();
+                    //autoAlign();
                     shoot();
-                    follower.followPath(endPath); //changed to end path: original beforepickup2
-                    setPathState(-1); //changed to -1, org 5
+                    follower.followPath(beforePickup2);
+                    setPathState(5);
                 }
                 break;
             case 5:
@@ -162,24 +164,24 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup2);
                     setPathState(7);
                 }
                 break;
             case 7:
                 if (!follower.isBusy()){
+                    //autoAlign();
                     shoot();
-                    follower.followPath(endPath); //org beforepickup3
+                    follower.followPath(endPath);//org beforepickup3
                     setPathState(-1);
+                    endIntake();
+                    stopShooter();
                 }
                 break;
             case 8:
                 if (!follower.isBusy()) {
-                    shooter.setVelocity(1270);
-                    startIntake();
-                    follower.followPath(getPickup3);
-                    setPathState(9);
+                    setPathState(-1);
                 }
                 break;
             case 9:
@@ -231,6 +233,8 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "leftIntakeServo");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
 
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -240,6 +244,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setDirection(Servo.Direction.REVERSE);
+        rightIntakeServo.setDirection(CRServo.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -327,12 +332,16 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     }
 
     public void startIntake(){
-        intake.setPower(0.3);
+        intake.setPower(0.5);
+        leftIntakeServo.setPower(1);
+        rightIntakeServo.setPower(1);
         ramp.setPower(0.6);
     }
 
     public void endIntake(){
         intake.setPower(0);
+        leftIntakeServo.setPower(0);
+        rightIntakeServo.setPower(0);
         ramp.setPower(0);
     }
 
@@ -405,7 +414,7 @@ public class Auto_BlueCloseSide extends LinearOpMode {
         }
         if (info != null) {
             err = Math.abs(info.bearing);
-            while (err > 1 && opModeIsActive()) {
+            while (err > 0.5 && opModeIsActive()) {
                 err = Math.abs(info.bearing);
                 double power = PIDControl(0.0, info.bearing);
                 // max power
