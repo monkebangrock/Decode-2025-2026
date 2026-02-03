@@ -340,7 +340,11 @@ public class BLUEMain100Percent extends LinearOpMode {
         }
 
         if(!emergencyMode){
-            if(shooterActive){
+            if (kickStandUp) {
+                shooter.setPower(0);
+                shooterActive = false;
+            }
+            else if(shooterActive){
                 shooter.setVelocity(velocity);
             }
             else{
@@ -348,7 +352,11 @@ public class BLUEMain100Percent extends LinearOpMode {
             }
         }
         else{
-            if(shooterActive){
+            if (kickStandUp) {
+                shooter.setPower(0);
+                shooterActive = false;
+            }
+            else if(shooterActive){
                 shooter.setPower(velocity/2520);
             }
             else{
