@@ -41,6 +41,8 @@ public class Auto_RedFarSide extends LinearOpMode {
     private DcMotorEx rightBack;
     private int pathState;
     private Servo blocker;
+    private CRServo leftIntakeServo;
+    private CRServo rightIntakeServo;
     SparkFunOTOS otos;
     Limelight3A limelight;
     double POI_Behind = 0.2;
@@ -51,21 +53,21 @@ public class Auto_RedFarSide extends LinearOpMode {
     double Kd=0.0; //0.005
     private double lastError=0;
 
-    private final Pose startPose = new Pose(123, 124, Math.toRadians(36));
-    private final Pose launchPose1 = new Pose(93, 90, Math.toRadians(50));
-    private final Pose launchPose2 = new Pose(91, 86, Math.toRadians(42));
-    private final Pose launchPose3 = new Pose(90,87,Math.toRadians(42));
+    private final Pose startPose = new Pose(124, 123, Math.toRadians(36));
+    private final Pose launchPose1 = new Pose(95, 93, Math.toRadians(50));
+    private final Pose launchPose2 = new Pose(92, 87, Math.toRadians(44));
+    private final Pose launchPose3 = new Pose(90,87,Math.toRadians(44));
     private final Pose launchPose4 = new Pose(79,95,Math.toRadians(29));
-    private final Pose pickup1 = new Pose(93, 88, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(94, 67, Math.toRadians(1));
+    private final Pose pickup1 = new Pose(93, 98, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(94, 79, Math.toRadians(1));
     private final Pose pickup3 = new Pose(94, 40, Math.toRadians(1));
-    private final Pose finishPickup1 = new Pose(128, 88, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(132, 67, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(128, 98, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(132, 79, Math.toRadians(0));
     private final Pose finishPickup3 = new Pose(131, 40, Math.toRadians(0));
     private final Pose control = new Pose(80,69);
     private final Pose control1 = new Pose(97,60);
     private final Pose control2 = new Pose(80,45);
-    private final Pose ending = new Pose(79,100,Math.toRadians(29));
+    private final Pose ending = new Pose(102,83,Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3,endPath;
@@ -89,7 +91,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 .setLinearHeadingInterpolation(finishPickup1.getHeading(), launchPose2.getHeading())
                 .build();
         beforePickup2 = follower.pathBuilder()
-                .addPath(new BezierCurve(launchPose2,control,pickup2))
+                .addPath(new BezierCurve(launchPose2,pickup2))
                 .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup2.getHeading())
                 .build();
         getPickup2 = follower.pathBuilder()
@@ -100,7 +102,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 .addPath(new BezierCurve(finishPickup2, control1, launchPose3))
                 .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
                 .build();
-        beforePickup3 = follower.pathBuilder()
+        /*beforePickup3 = follower.pathBuilder()
                 .addPath(new BezierCurve(launchPose3, control2, pickup3))
                 .setLinearHeadingInterpolation(launchPose3.getHeading(), pickup3.getHeading())
                 .build();
@@ -111,10 +113,10 @@ public class Auto_RedFarSide extends LinearOpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(finishPickup3, launchPose4))
                 .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
-                .build();
+                .build();*/
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose4, ending))
-                .setLinearHeadingInterpolation(launchPose4.getHeading(), ending.getHeading())
+                .addPath(new BezierLine(launchPose3, ending))
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading())
                 .build();
     }
 
@@ -141,7 +143,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup1);
                     setPathState(4);
                 }
@@ -162,7 +164,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup2);
                     setPathState(7);
                 }
@@ -170,8 +172,9 @@ public class Auto_RedFarSide extends LinearOpMode {
             case 7:
                 if (!follower.isBusy()){
                     shoot();
-                    follower.followPath(beforePickup3);
-                    setPathState(8);
+                    stopShooter();
+                    follower.followPath(endPath);
+                    setPathState(-1);
                 }
                 break;
             case 8:
@@ -183,7 +186,7 @@ public class Auto_RedFarSide extends LinearOpMode {
                 break;
             case 9:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup3);
                     setPathState(10);
                 }
@@ -228,6 +231,8 @@ public class Auto_RedFarSide extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "leftIntakeServo");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
 
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -237,6 +242,7 @@ public class Auto_RedFarSide extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setDirection(Servo.Direction.REVERSE);
+        rightIntakeServo.setDirection(CRServo.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -255,7 +261,7 @@ public class Auto_RedFarSide extends LinearOpMode {
         waitForStart();
         opmodeTimer.resetTimer();
         blocker.setPosition(0.29);
-        shooter.setVelocity(1260);
+        shooter.setVelocity(1250);
         setPathState(0);
         while (opModeIsActive()) {
             follower.update();
@@ -273,9 +279,9 @@ public class Auto_RedFarSide extends LinearOpMode {
     public void shoot() {
         shooter.setMotorEnable();
         blocker.setPosition(0.29);
-        while((shooter.getVelocity() <= 1260)&&opModeIsActive()){
+        while((shooter.getVelocity() <= 1250)&&opModeIsActive()){
             telemetry.addData("velocity",shooter.getVelocity());
-            shooter.setVelocity(1260);
+            shooter.setVelocity(1250);
             telemetry.update();
         }
         blocker.setPosition(0);
@@ -297,12 +303,16 @@ public class Auto_RedFarSide extends LinearOpMode {
     }
 
     public void startIntake(){
-        intake.setPower(0.45);
+        intake.setPower(0.65);
+        leftIntakeServo.setPower(1);
+        rightIntakeServo.setPower(1);
         ramp.setPower(0.6);
     }
 
     public void endIntake(){
         intake.setPower(0);
+        leftIntakeServo.setPower(0);
+        rightIntakeServo.setPower(0);
         ramp.setPower(0);
     }
 
