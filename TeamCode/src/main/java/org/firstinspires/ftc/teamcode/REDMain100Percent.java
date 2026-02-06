@@ -239,17 +239,11 @@ public class REDMain100Percent extends LinearOpMode {
             autoAlign();
             fullPark();
             arms();
-
-            telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             telemetry.addData("Shooter:", velocity);
+            telemetry.addData("otos heading:", Math.toRadians(otos.getPosition().h));
             double bp_x = botpose.getPosition().x;
             double bp_y = botpose.getPosition().y;
             double angle = Math.atan(x/y);
-            telemetry.addData("Botpose X: ", bp_x);
-            telemetry.addData("Botpose Y: ", bp_y);
-            telemetry.addData("Angle: ", angle);
-            telemetry.addData("Botpose", botpose.toString());
-            telemetry.addData("imu output: ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
             telemetry.update();
         }
     }
@@ -396,7 +390,6 @@ public class REDMain100Percent extends LinearOpMode {
             }
             telemetry.addData("Bearing", "%.2f°", target.bearing);
             telemetry.addData("Distance", "%.3f m", target.distance);
-            telemetry.update();
         } else {
             leftLight.setPosition(1);
             telemetry.addLine("No target");
