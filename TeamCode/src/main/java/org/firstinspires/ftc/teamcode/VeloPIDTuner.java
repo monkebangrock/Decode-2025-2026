@@ -26,7 +26,7 @@ public class VeloPIDTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Change my id
-        DcMotorEx myMotor = hardwareMap.get(DcMotorEx.class, "rightShooter");
+        DcMotorEx myMotor = hardwareMap.get(DcMotorEx.class, "shooter");
         DcMotorEx ramp = hardwareMap.get(DcMotorEx.class, "ramp");
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
 

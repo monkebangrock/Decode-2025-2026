@@ -39,6 +39,8 @@ public class Auto_RedCloseSide extends LinearOpMode {
     private DcMotorEx leftBack;
     private DcMotorEx rightFront;
     private DcMotorEx rightBack;
+    private CRServo leftIntakeServo;
+    private CRServo rightIntakeServo;
     private int pathState;
     private Servo blocker;
     SparkFunOTOS otos;
@@ -53,16 +55,16 @@ public class Auto_RedCloseSide extends LinearOpMode {
 
     private final Pose startPose = new Pose(88, 8, Math.toRadians(90));
     private final Pose launchPose1 = new Pose(86, 10, Math.toRadians(64));
-    private final Pose launchPose2 = new Pose(84.5, 24.5, Math.toRadians(62));
-    private final Pose launchPose3 = new Pose(84, 27, Math.toRadians(60));
+    private final Pose launchPose2 = new Pose(84.5, 14.5, Math.toRadians(60));
+    private final Pose launchPose3 = new Pose(82, 4, Math.toRadians(62));
     private final Pose launchPose4 = new Pose(84, 115, Math.toRadians(27));
-    private final Pose pickup1 = new Pose(103, 45.5, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(108,72 , Math.toRadians(0));
+    private final Pose pickup1 = new Pose(103, 33.5, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(100,39, Math.toRadians(0));
     private final Pose pickup3 = new Pose(108, 95, Math.toRadians(0));
-    private final Pose finishPickup1 = new Pose(136, 45.5, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(133, 72, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(130, 33.5, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(126, 39, Math.toRadians(0));
     private final Pose finishPickup3 = new Pose(130, 95, Math.toRadians(0));
-    private final Pose ending = new Pose(110,25,Math.toRadians(90));
+    private final Pose ending = new Pose(102,44,Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
@@ -97,7 +99,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 .addPath(new BezierCurve(finishPickup2, launchPose3))
                 .setLinearHeadingInterpolation(finishPickup2.getHeading(), launchPose3.getHeading())
                 .build();
-        beforePickup3 = follower.pathBuilder()
+        /*beforePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose3, pickup3))
                 .setLinearHeadingInterpolation(launchPose3.getHeading(), pickup3.getHeading())
                 .build();
@@ -108,10 +110,10 @@ public class Auto_RedCloseSide extends LinearOpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierCurve(finishPickup3, launchPose4))
                 .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
-                .build();
+                .build();*/
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose4, ending))
-                .setLinearHeadingInterpolation(launchPose4.getHeading(), ending.getHeading())
+                .addPath(new BezierLine(launchPose3, ending))
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading())
                 .build();
     }
 
@@ -138,7 +140,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup1);
                     setPathState(4);
                 }
@@ -146,8 +148,8 @@ public class Auto_RedCloseSide extends LinearOpMode {
             case 4:
                 if (!follower.isBusy()) {
                     shoot();
-                    follower.followPath(endPath); //changed to only pick up
-                    setPathState(-1); //changed to -1, org 5
+                    follower.followPath(beforePickup2); //changed to only pick up
+                    setPathState(5); //changed to -1, org 5
                 }
                 break;
             case 5:
@@ -159,7 +161,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    //endIntake();
+                    endIntake();
                     follower.followPath(scorePickup2);
                     setPathState(7);
                 }
@@ -167,8 +169,9 @@ public class Auto_RedCloseSide extends LinearOpMode {
             case 7:
                 if (!follower.isBusy()){
                     shoot();
-                    follower.followPath(beforePickup3);
-                    setPathState(8);
+                    stopShooter();
+                    follower.followPath(endPath);
+                    setPathState(-1);
                 }
                 break;
             case 8:
@@ -181,7 +184,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 break;
             case 9:
                 if (!follower.isBusy()) {
-                    // endIntake();
+                    endIntake();
                     follower.followPath(scorePickup3);
                     setPathState(10);
                 }
@@ -226,6 +229,8 @@ public class Auto_RedCloseSide extends LinearOpMode {
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         otos = hardwareMap.get(SparkFunOTOS.class, "otos");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "leftIntakeServo");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "rightIntakeServo");
 
 
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -236,6 +241,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         blocker.setDirection(Servo.Direction.REVERSE);
+        rightIntakeServo.setDirection(CRServo.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -322,13 +328,17 @@ public class Auto_RedCloseSide extends LinearOpMode {
     }
 
     public void startIntake(){
-        intake.setPower(0.3);
+        intake.setPower(0.5);
         ramp.setPower(0.6);
+        leftIntakeServo.setPower(1);
+        rightIntakeServo.setPower(1);
     }
 
     public void endIntake(){
         intake.setPower(0);
         ramp.setPower(0);
+        leftIntakeServo.setPower(0);
+        rightIntakeServo.setPower(0);
     }
 
     public void stopShooter(){
