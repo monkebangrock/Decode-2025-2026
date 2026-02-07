@@ -168,7 +168,7 @@ public class BLUEMain100Percent extends LinearOpMode {
         rightBack.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         ramp.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         kickStand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        blocker.setPosition(0.29);
+        blocker.setPosition(0.27);
         rightLight.setPosition(1);
         leftLight.setPosition(1);
         leftArm.setPosition(0.0);
@@ -256,8 +256,8 @@ public class BLUEMain100Percent extends LinearOpMode {
             ramp.setMotorEnable();
             intake.setPower(.5);
             ramp.setPower(.6);
-            rightIntakeServo.setPower(1);
-            leftIntakeServo.setPower(1);
+            //rightIntakeServo.setPower(1);
+            //leftIntakeServo.setPower(1);
             rightArm.setPosition(.3);
             leftArm.setPosition(.3);
         }
@@ -513,7 +513,9 @@ public class BLUEMain100Percent extends LinearOpMode {
                             break;
                         }
                     } while (info==null);
-                    err = Math.abs(info.bearing);
+                    if(info!=null) {
+                        err = Math.abs(info.bearing);
+                    }
                 }
             }
         } else if (aPressed && !gamepad1.a) {

@@ -55,19 +55,19 @@ public class Auto_RedFarSide extends LinearOpMode {
 
     private final Pose startPose = new Pose(124, 123, Math.toRadians(36));
     private final Pose launchPose1 = new Pose(95, 93, Math.toRadians(50));
-    private final Pose launchPose2 = new Pose(92, 87, Math.toRadians(44));
+    private final Pose launchPose2 = new Pose(93, 88, Math.toRadians(44));
     private final Pose launchPose3 = new Pose(90.5,87.5,Math.toRadians(44));
     private final Pose launchPose4 = new Pose(79,95,Math.toRadians(29));
-    private final Pose pickup1 = new Pose(92, 98, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(94, 77, Math.toRadians(1));
+    private final Pose pickup1 = new Pose(92, 97, Math.toRadians(0));
+    private final Pose pickup2 = new Pose(94, 74, Math.toRadians(1));
     private final Pose pickup3 = new Pose(94, 40, Math.toRadians(1));
-    private final Pose finishPickup1 = new Pose(128, 98, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(132, 77, Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(128, 97, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(132, 74, Math.toRadians(0));
     private final Pose finishPickup3 = new Pose(131, 40, Math.toRadians(0));
     private final Pose control = new Pose(80,69);
     private final Pose control1 = new Pose(97,60);
     private final Pose control2 = new Pose(80,45);
-    private final Pose ending = new Pose(102,83,Math.toRadians(0));
+    private final Pose ending = new Pose(102,74,Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3,endPath;

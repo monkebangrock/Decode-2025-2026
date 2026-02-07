@@ -13,7 +13,6 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -27,7 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.List;
 
 @Autonomous
-public class Auto_RedCloseSide extends LinearOpMode {
+public class Auto_RedShootPark extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private Follower follower;
@@ -55,16 +54,16 @@ public class Auto_RedCloseSide extends LinearOpMode {
 
     private final Pose startPose = new Pose(88, 8, Math.toRadians(90));
     private final Pose launchPose1 = new Pose(86, 10, Math.toRadians(64));
-    private final Pose launchPose2 = new Pose(84.5, 14.5, Math.toRadians(60));
-    private final Pose launchPose3 = new Pose(82, 4, Math.toRadians(62));
+    /*private final Pose launchPose2 = new Pose(84.5, 17.5, Math.toRadians(61));
+    private final Pose launchPose3 = new Pose(82, 5.5, Math.toRadians(63));
     private final Pose launchPose4 = new Pose(84, 115, Math.toRadians(27));
-    private final Pose pickup1 = new Pose(103, 34.5, Math.toRadians(0));
-    private final Pose pickup2 = new Pose(98,44, Math.toRadians(0));
+    private final Pose pickup1 = new Pose(103, 44.5, Math.toRadians(0)); //old y 36.5
+    private final Pose pickup2 = new Pose(98,63.5, Math.toRadians(0));
     private final Pose pickup3 = new Pose(108, 95, Math.toRadians(0));
-    private final Pose finishPickup1 = new Pose(130, 34.5, Math.toRadians(0));
-    private final Pose finishPickup2 = new Pose(126, 44, Math.toRadians(0));
-    private final Pose finishPickup3 = new Pose(130, 95, Math.toRadians(0));
-    private final Pose ending = new Pose(102,44,Math.toRadians(0));
+    private final Pose finishPickup1 = new Pose(130, 44.5, Math.toRadians(0));
+    private final Pose finishPickup2 = new Pose(126, 63.5, Math.toRadians(0));
+    private final Pose finishPickup3 = new Pose(130, 95, Math.toRadians(0));*/
+    private final Pose ending = new Pose(102,10,Math.toRadians(0));
 
     private Path scorePreload;
     private PathChain beforePickup1, getPickup1, scorePickup1, beforePickup2, getPickup2, scorePickup2, beforePickup3, getPickup3, scorePickup3, endPath;
@@ -75,7 +74,7 @@ public class Auto_RedCloseSide extends LinearOpMode {
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), launchPose1.getHeading());
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
-        beforePickup1 = follower.pathBuilder()
+        /*beforePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose2, pickup1))
                 .setLinearHeadingInterpolation(launchPose2.getHeading(), pickup1.getHeading())
                 .build();
@@ -112,8 +111,8 @@ public class Auto_RedCloseSide extends LinearOpMode {
                 .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
                 .build();*/
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose3, ending))
-                .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading())
+                .addPath(new BezierLine(launchPose1, ending))
+                .setLinearHeadingInterpolation(launchPose1.getHeading(), ending.getHeading())
                 .build();
     }
 
@@ -127,8 +126,9 @@ public class Auto_RedCloseSide extends LinearOpMode {
             case 1:
                 if (!follower.isBusy()) {
                     shoot();
-                    follower.followPath(beforePickup1);
-                    setPathState(2);
+                    follower.followPath(endPath);
+                    endIntake();
+                    setPathState(-1);
                 }
                 break;
             case 2:

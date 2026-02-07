@@ -55,14 +55,14 @@ public class Auto_BlueCloseSide extends LinearOpMode {
     boolean aligned=false;
 
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90));
-    private final Pose launchPose1 = new Pose(58, 8.5, Math.toRadians(111));
-    private final Pose launchPose2 = new Pose(60, 14.5, Math.toRadians(117));
-    private final Pose launchPose3 = new Pose(58, 15, Math.toRadians(120));
+    private final Pose launchPose1 = new Pose(55, 8.5, Math.toRadians(111));
+    private final Pose launchPose2 = new Pose(60, 11.5, Math.toRadians(117));
+    private final Pose launchPose3 = new Pose(58, 13, Math.toRadians(120));
     private final Pose launchPose4 = new Pose(65, 95, Math.toRadians(151));
-    private final Pose pickup1 = new Pose(56, 21, Math.toRadians(180));
+    private final Pose pickup1 = new Pose(56, 22, Math.toRadians(180));
     private final Pose pickup2 = new Pose(56, 43, Math.toRadians(180));
     private final Pose pickup3 = new Pose(56, 79, Math.toRadians(180));
-    private final Pose finishPickup1 = new Pose(37, 21, Math.toRadians(180));
+    private final Pose finishPickup1 = new Pose(35, 22, Math.toRadians(180));
     private final Pose finishPickup2 = new Pose(35, 43, Math.toRadians(180));
     private final Pose finishPickup3 = new Pose(33, 79, Math.toRadians(180));
     private final Pose ending = new Pose(56,43,Math.toRadians(180));
@@ -113,8 +113,8 @@ public class Auto_BlueCloseSide extends LinearOpMode {
                 .setLinearHeadingInterpolation(finishPickup3.getHeading(), launchPose4.getHeading())
                 .build();
         endPath = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose2, ending)) //changed from launchpose4 to launchpose2
-                .setLinearHeadingInterpolation(launchPose2.getHeading(), ending.getHeading()) //changed from launchpose4 to launchpose2
+                .addPath(new BezierLine(launchPose3, ending)) //changed from launchpose4 to launchpose2
+                .setLinearHeadingInterpolation(launchPose3.getHeading(), ending.getHeading()) //changed from launchpose4 to launchpose2
                 .build();
     }
 
